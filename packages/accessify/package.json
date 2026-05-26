@@ -1,7 +1,34 @@
 {
   "name": "@glitchlab/accessify",
-  "version": "0.1.10",
+  "version": "0.1.11",
+  "description": "A lightweight, framework-agnostic accessibility widget for the web. Drop it in to give users font size, contrast, dyslexia, color blind, keyboard navigation, and screen reader controls — with zero dependencies and first-class React, Vue 3, and Svelte bindings.",
   "license": "MIT",
+  "author": "GlitchLab (https://github.com/im-fahad)",
+  "homepage": "https://accessify-playground.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/im-fahad/accessify.git"
+  },
+  "bugs": {
+    "url": "https://github.com/im-fahad/accessify/issues"
+  },
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "wcag",
+    "widget",
+    "react",
+    "vue",
+    "svelte",
+    "dyslexia",
+    "contrast",
+    "color-blind",
+    "keyboard-navigation",
+    "screen-reader",
+    "i18n",
+    "rtl",
+    "dark-mode"
+  ],
   "main": "./dist/core.cjs.js",
   "module": "./dist/core.esm.js",
   "types": "./dist/core.d.ts",
