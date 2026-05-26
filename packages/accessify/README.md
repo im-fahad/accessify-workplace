@@ -11,7 +11,7 @@ Works as a plain JavaScript class or with first-class bindings for **React**, **
 - **8 accessibility profiles** — Seizure Safe, Vision Impaired, ADHD Friendly, Cognitive Disability, Keyboard Navigation, Screen Reader, Color Blind, Dyslexia
 - **Content adjustments** — font size, content scale, line height, letter spacing, text alignment, readable font, text magnifier, title/link highlighting
 - **Color adjustments** — dark contrast, light contrast, high contrast, monochrome, invert colors, color blind (protanopia filter)
-- **Dark mode** — auto-detects OS `prefers-color-scheme`, or set manually via `colorScheme` config
+- **Dark mode** — light by default, opt in with `colorScheme: 'dark'`
 - **Keyboard navigation** — full focus trap in panel, Escape to close, skip-to-main link injection
 - **i18n** — built-in translations for English, Spanish, French, German, Portuguese, Arabic (RTL supported)
 - **WCAG page scanner** — one-click analysis with score and categorised issues (contrast, alt text, labels, headings, etc.)
@@ -136,7 +136,7 @@ const widget = new Accessify(config?)
 
 | Method | Description |
 |---|---|
-| `mount(target?)` | Inject widget into DOM. No target = appends to `document.body` |
+| `mount()` | Inject widget into DOM (appended to `document.body`) |
 | `destroy()` | Remove widget and all applied effects |
 | `open()` | Open the settings panel |
 | `close()` | Close the settings panel |
@@ -144,7 +144,7 @@ const widget = new Accessify(config?)
 | `reset()` | Reset all settings to defaults |
 | `setSize(size)` | Change widget size at runtime (`'S'`, `'M'`, `'L'`) |
 | `setLang(lang)` | Change language at runtime |
-| `setColorScheme(scheme)` | Change color scheme at runtime (`'light'`, `'dark'`, `'auto'`) |
+| `setColorScheme(scheme)` | Change color scheme at runtime (`'light'` or `'dark'`) |
 | `getState()` | Returns a copy of the current `AccessifyState` |
 | `getIsOpen()` | Returns whether the panel is open |
 
@@ -192,13 +192,30 @@ widget.setLang('ar') // also applies RTL layout
 
 ## Keyboard Navigation
 
-The widget is fully keyboard accessible:
+The widget panel itself is fully keyboard accessible:
 
 - **Tab / Shift+Tab** — cycles focus within the open panel (focus trap)
 - **Escape** — closes the panel and returns focus to the trigger button
-- **Keyboard Navigation profile** — automatically injects a skip-to-main-content link into the page when activated
 
 The trigger button exposes `aria-expanded` and the panel has `role="dialog"` with `aria-modal="true"`.
+
+### Keyboard Navigation profile
+
+When the user activates the **Keyboard Navigation** profile, the widget enhances keyboard usability across the entire host page:
+
+- **Strong focus rings** — every focused element (links, buttons, inputs, `[tabindex]`, `[role=button|link]`, summaries) gets a 3px solid blue outline with a 6px soft glow so the active element is always clearly visible
+- **Hover outlines** — links and buttons show a dashed blue outline on hover as a secondary visual cue
+- **Skip-to-main link** — a hidden "Skip to main content" link is injected at the top of the page. Press **Tab** once when the page loads and it appears; press **Enter** to jump directly to `<main>` (or any element matching `[role="main"]`, `#main`, `#content`, or `#main-content`)
+
+### Screen Reader profile
+
+The **Screen Reader** profile reinforces page structure for users relying on assistive tech *and* makes the semantic landmarks visible to sighted users testing accessibility:
+
+- Dashed outlines and visible labels (`MAIN`, `NAV`, `HEADER`, `FOOTER`, `ASIDE`, `SECTION`, `ARTICLE`, `FORM`) on every semantic region
+- Forced underlines on all links so they're distinguishable from regular text
+- Red outline + ⚠ warning on any `<img>` missing `alt` text
+- Minimum 32×32 px tap targets for buttons and links
+- Skip-to-main link injection (same as Keyboard Navigation)
 
 ---
 
@@ -243,10 +260,7 @@ import { AccessifyWidget } from '@glitchlab/accessify/react'
 />
 ```
 
-The `colorScheme`, `lang`, and `size` props are **reactive** — changing them after mount will update the widget at runtime.
-
-```tsx
-```
+The `colorScheme`, `lang`, and `size` props are **reactive** — changing them after mount will update the widget at runtime. Other props (`position`, `theme`, `persistence`) only take effect at construction; remount the widget (e.g. via a React `key`) to change them.
 
 ### `useAccessify(config?)`
 
@@ -388,8 +402,8 @@ type AccessibilityProfile =
 | `vision-impaired` | Font size +4, content scale +2, line height +2 |
 | `adhd-friendly` | Highlight links, highlight titles, readable font |
 | `cognitive-disability` | Highlight links, highlight titles, readable font, line height +2 |
-| `keyboard-navigation` | Skip-to-main link injection |
-| `screen-reader` | Screen reader optimised layout |
+| `keyboard-navigation` | Strong blue focus rings on every focusable element, hover outlines, skip-to-main link |
+| `screen-reader` | Dashed outlines + visible labels on all semantic landmarks (`main`, `nav`, `header`, etc.), underlined links, alt-text warnings on images, larger tap targets, skip-to-main link |
 | `color-blind` | Protanopia SVG filter |
 | `dyslexia` | Readable font, letter spacing +2, line height +2 |
 
