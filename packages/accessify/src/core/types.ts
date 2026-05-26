@@ -12,6 +12,9 @@ export type AccessibilityProfile =
   | 'color-blind'
   | 'dyslexia'
 
+export type ColorScheme = 'light' | 'dark' | 'auto'
+export type Lang = 'en' | 'ar' | 'es' | 'fr' | 'de' | 'pt'
+
 export interface AccessifyConfig {
   position?: Position
   size?: WidgetSize
@@ -20,8 +23,9 @@ export interface AccessifyConfig {
     background?: string
     text?: string
   }
+  colorScheme?: ColorScheme
   persistence?: boolean
-  lang?: string
+  lang?: Lang
   onOpen?: () => void
   onClose?: () => void
   onReset?: () => void

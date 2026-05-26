@@ -334,3 +334,78 @@ describe('Accessify — persistence', () => {
     a.destroy()
   })
 })
+
+describe('Accessify — dark mode', () => {
+  it('applies light scheme by default', () => {
+    const a = new Accessify()
+    a.mount()
+    expect(document.querySelector<HTMLElement>('.accessify-root')?.dataset.scheme).toBe('light')
+    a.destroy()
+  })
+
+  it('applies dark scheme when colorScheme=dark', () => {
+    const a = new Accessify({ colorScheme: 'dark' })
+    a.mount()
+    expect(document.querySelector<HTMLElement>('.accessify-root')?.dataset.scheme).toBe('dark')
+    a.destroy()
+  })
+
+  it('applies light scheme when colorScheme=light', () => {
+    const a = new Accessify({ colorScheme: 'light' })
+    a.mount()
+    expect(document.querySelector<HTMLElement>('.accessify-root')?.dataset.scheme).toBe('light')
+    a.destroy()
+  })
+
+  it('setColorScheme updates scheme at runtime', () => {
+    const a = new Accessify({ colorScheme: 'light' })
+    a.mount()
+    a.setColorScheme('dark')
+    expect(document.querySelector<HTMLElement>('.accessify-root')?.dataset.scheme).toBe('dark')
+    a.destroy()
+  })
+})
+
+describe('Accessify — i18n', () => {
+  it('renders Spanish labels when lang=es', () => {
+    const a = new Accessify({ lang: 'es' })
+    a.mount()
+    a.open()
+    expect(document.querySelector('.accessify-panel')?.innerHTML).toContain('Configuración de Accesibilidad')
+    a.destroy()
+  })
+
+  it('setLang updates panel language at runtime', () => {
+    const a = new Accessify({ lang: 'en' })
+    a.mount()
+    a.open()
+    a.setLang('fr')
+    expect(document.querySelector('.accessify-panel')?.innerHTML).toContain("Paramètres d'Accessibilité")
+    a.destroy()
+  })
+})
+
+describe('Accessify — keyboard navigation profile', () => {
+  it('injects skip link when keyboard-navigation profile is activated', () => {
+    const a = new Accessify()
+    a.mount()
+    const main = document.createElement('main')
+    main.id = 'main'
+    document.body.appendChild(main)
+    document.querySelector<HTMLButtonElement>('.accessify-panel [data-profile="keyboard-navigation"]')!.click()
+    expect(document.getElementById('accessify-skip-link')).not.toBeNull()
+    a.destroy()
+  })
+
+  it('removes skip link when keyboard-navigation profile is deactivated', () => {
+    const a = new Accessify()
+    a.mount()
+    const main = document.createElement('main')
+    main.id = 'main'
+    document.body.appendChild(main)
+    document.querySelector<HTMLButtonElement>('.accessify-panel [data-profile="keyboard-navigation"]')!.click()
+    document.querySelector<HTMLButtonElement>('.accessify-panel [data-profile="keyboard-navigation"]')!.click()
+    expect(document.getElementById('accessify-skip-link')).toBeNull()
+    a.destroy()
+  })
+})

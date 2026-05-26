@@ -11,9 +11,13 @@ Works as a plain JavaScript class or with first-class bindings for **React**, **
 - **8 accessibility profiles** — Seizure Safe, Vision Impaired, ADHD Friendly, Cognitive Disability, Keyboard Navigation, Screen Reader, Color Blind, Dyslexia
 - **Content adjustments** — font size, content scale, line height, letter spacing, text alignment, readable font, text magnifier, title/link highlighting
 - **Color adjustments** — dark contrast, light contrast, high contrast, monochrome, invert colors, color blind (protanopia filter)
+- **Dark mode** — auto-detects OS `prefers-color-scheme`, or set manually via `colorScheme` config
+- **Keyboard navigation** — full focus trap in panel, Escape to close, skip-to-main link injection
+- **i18n** — built-in translations for English, Spanish, French, German, Portuguese, Arabic (RTL supported)
+- **WCAG page scanner** — one-click analysis with score and categorised issues (contrast, alt text, labels, headings, etc.)
 - **3 widget sizes** — S / M / L
 - **State persistence** via `localStorage` (opt-out available)
-- **DOM isolation** — all effects are scoped to the host page content; the widget UI is never affected
+- **DOM isolation** — all effects are scoped to the host page; the widget UI is never affected
 - **Themeable** — override primary, background, and text colors
 - **No dependencies** — core package is pure TypeScript/DOM
 
@@ -41,6 +45,8 @@ import { Accessify } from '@glitchlab/accessify'
 const widget = new Accessify({
   position: 'bottom-right',
   size: 'M',
+  colorScheme: 'auto', // 'light' | 'dark' | 'auto'
+  lang: 'en',          // 'en' | 'es' | 'fr' | 'de' | 'pt' | 'ar'
 })
 
 widget.mount()
@@ -55,7 +61,7 @@ export default function App() {
   return (
     <>
       <YourApp />
-      <AccessifyWidget position="bottom-right" size="M" />
+      <AccessifyWidget position="bottom-right" size="M" colorScheme="auto" lang="en" />
     </>
   )
 }
@@ -96,6 +102,12 @@ interface AccessifyConfig {
   /** Panel size. Default: 'M' */
   size?: 'S' | 'M' | 'L'
 
+  /** Color scheme for the widget UI. Default: 'auto' (follows OS preference) */
+  colorScheme?: 'light' | 'dark' | 'auto'
+
+  /** Panel language. Default: 'en' */
+  lang?: 'en' | 'es' | 'fr' | 'de' | 'pt' | 'ar'
+
   /** Override default theme colors */
   theme?: {
     primary?: string     // trigger + panel header background. Default: '#0c0c0c'
@@ -106,29 +118,10 @@ interface AccessifyConfig {
   /** Persist state to localStorage. Default: true */
   persistence?: boolean
 
-  /** Language code (reserved for future i18n). Default: 'en' */
-  lang?: string
-
   onOpen?: () => void
   onClose?: () => void
   onReset?: () => void
 }
-```
-
-### Example with theme
-
-```ts
-const widget = new Accessify({
-  position: 'bottom-left',
-  size: 'L',
-  theme: {
-    primary: '#1d4ed8',
-    background: '#f8fafc',
-    text: '#0f172a',
-  },
-  persistence: false,
-  onOpen: () => console.log('widget opened'),
-})
 ```
 
 ---
@@ -143,15 +136,92 @@ const widget = new Accessify(config?)
 
 | Method | Description |
 |---|---|
-| `mount(target?)` | Inject the widget into the DOM. If no target is given, appends to `document.body` |
-| `destroy()` | Remove the widget and all applied effects from the DOM |
+| `mount(target?)` | Inject widget into DOM. No target = appends to `document.body` |
+| `destroy()` | Remove widget and all applied effects |
 | `open()` | Open the settings panel |
 | `close()` | Close the settings panel |
 | `toggle()` | Toggle the panel open/closed |
-| `reset()` | Reset all accessibility settings to defaults |
+| `reset()` | Reset all settings to defaults |
 | `setSize(size)` | Change widget size at runtime (`'S'`, `'M'`, `'L'`) |
+| `setLang(lang)` | Change language at runtime |
+| `setColorScheme(scheme)` | Change color scheme at runtime (`'light'`, `'dark'`, `'auto'`) |
 | `getState()` | Returns a copy of the current `AccessifyState` |
-| `getIsOpen()` | Returns whether the panel is currently open |
+| `getIsOpen()` | Returns whether the panel is open |
+
+---
+
+## Dark Mode
+
+The widget auto-detects the OS color scheme by default (`colorScheme: 'auto'`). You can override it:
+
+```ts
+// Always dark
+new Accessify({ colorScheme: 'dark' })
+
+// Always light
+new Accessify({ colorScheme: 'light' })
+
+// Follow OS (default)
+new Accessify({ colorScheme: 'auto' })
+
+// Change at runtime
+widget.setColorScheme('dark')
+```
+
+---
+
+## Internationalisation (i18n)
+
+All panel text is translated. Pass the `lang` config option or call `setLang()` at runtime:
+
+```ts
+new Accessify({ lang: 'fr' })
+
+// Change at runtime
+widget.setLang('ar') // also applies RTL layout
+```
+
+| Code | Language |
+|---|---|
+| `en` | English (default) |
+| `es` | Spanish |
+| `fr` | French |
+| `de` | German |
+| `pt` | Portuguese |
+| `ar` | Arabic (RTL) |
+
+---
+
+## Keyboard Navigation
+
+The widget is fully keyboard accessible:
+
+- **Tab / Shift+Tab** — cycles focus within the open panel (focus trap)
+- **Escape** — closes the panel and returns focus to the trigger button
+- **Keyboard Navigation profile** — automatically injects a skip-to-main-content link into the page when activated
+
+The trigger button exposes `aria-expanded` and the panel has `role="dialog"` with `aria-modal="true"`.
+
+---
+
+## WCAG Page Scanner
+
+Click **Analyze Page** inside the widget to run a live accessibility scan. The scanner checks:
+
+| Check | Severity |
+|---|---|
+| Images missing `alt` text | Fail |
+| Form inputs without labels | Fail |
+| Buttons with no accessible name | Fail |
+| Links with no accessible text | Fail |
+| Missing `lang` attribute on `<html>` | Fail |
+| iframes missing `title` | Fail |
+| Text with insufficient color contrast | Fail |
+| Skipped heading levels (e.g. h1 → h3) | Warning |
+| Interactive elements smaller than 24×24px | Warning |
+| No skip-to-main link | Warning |
+
+Results include a score (0–100), issue count, and per-issue element selectors.
 
 ---
 
@@ -159,14 +229,14 @@ const widget = new Accessify(config?)
 
 ### `<AccessifyWidget />`
 
-A component that mounts the widget into its own container div.
-
 ```tsx
 import { AccessifyWidget } from '@glitchlab/accessify/react'
 
 <AccessifyWidget
   position="bottom-right"
   size="M"
+  colorScheme="auto"
+  lang="en"
   theme={{ primary: '#6d28d9' }}
   persistence={true}
   onOpen={() => {}}
@@ -175,11 +245,7 @@ import { AccessifyWidget } from '@glitchlab/accessify/react'
 />
 ```
 
-Accepts all `AccessifyConfig` props. Automatically destroys the widget on unmount.
-
 ### `useAccessify(config?)`
-
-A hook for programmatic control.
 
 ```tsx
 import { useAccessify } from '@glitchlab/accessify/react'
@@ -187,6 +253,7 @@ import { useAccessify } from '@glitchlab/accessify/react'
 function MyComponent() {
   const { open, close, toggle, reset, state, isOpen } = useAccessify({
     position: 'top-right',
+    lang: 'fr',
   })
 
   return (
@@ -218,15 +285,9 @@ import { AccessifyWidget } from '@glitchlab/accessify/vue'
 </script>
 
 <template>
-  <AccessifyWidget
-    position="bottom-right"
-    size="M"
-    :persistence="true"
-  />
+  <AccessifyWidget position="bottom-right" size="M" :persistence="true" />
 </template>
 ```
-
-Props: `position`, `size`, `persistence`, `lang`.
 
 ### `useAccessify(config?)`
 
@@ -234,23 +295,19 @@ Props: `position`, `size`, `persistence`, `lang`.
 <script setup>
 import { useAccessify } from '@glitchlab/accessify/vue'
 
-const { open, close, toggle, reset, state, isOpen } = useAccessify()
+const { open, close, toggle, reset, state, isOpen } = useAccessify({ lang: 'de' })
 </script>
 ```
 
 ### `AccessifyPlugin`
-
-Register globally via the Vue plugin API:
 
 ```ts
 import { createApp } from 'vue'
 import { AccessifyPlugin } from '@glitchlab/accessify/vue'
 
 const app = createApp(App)
-app.use(AccessifyPlugin, { position: 'bottom-right' })
+app.use(AccessifyPlugin, { position: 'bottom-right', lang: 'es' })
 ```
-
-This provides the `Accessify` instance via `inject('accessify')` and `this.$accessify`.
 
 ---
 
@@ -258,43 +315,21 @@ This provides the `Accessify` instance via `inject('accessify')` and `this.$acce
 
 ### `accessifyStore`
 
-A pre-built Svelte store for simple usage:
-
 ```svelte
 <script>
   import { accessifyStore } from '@glitchlab/accessify/svelte'
-
   accessifyStore.mount()
-
-  // Subscribe to state
-  $: state = $accessifyStore
-  $: isOpen = $accessifyStore.isOpen
 </script>
 
 <button on:click={accessifyStore.toggle}>Toggle</button>
 ```
 
-| Method | Description |
-|---|---|
-| `mount(target?)` | Mount the widget |
-| `destroy()` | Destroy the widget |
-| `open()` | Open the panel |
-| `close()` | Close the panel |
-| `toggle()` | Toggle the panel |
-| `reset()` | Reset all settings |
-
 ### `createAccessifyStore(config?)`
-
-Create a custom store with your own config:
 
 ```ts
 import { createAccessifyStore } from '@glitchlab/accessify/svelte'
 
-const widget = createAccessifyStore({
-  position: 'top-left',
-  persistence: false,
-})
-
+const widget = createAccessifyStore({ lang: 'pt', colorScheme: 'dark' })
 widget.mount()
 ```
 
@@ -302,11 +337,8 @@ widget.mount()
 
 ## Accessibility State
 
-The full shape of the state object:
-
 ```ts
 interface AccessifyState {
-  // Active profile (null = none selected)
   profile: AccessibilityProfile | null
 
   // Numeric adjustments (0 = default)
@@ -315,7 +347,6 @@ interface AccessifyState {
   lineHeight: number      // range: -2 to +6
   letterSpacing: number   // range: -2 to +6
 
-  // Text
   textAlignment: 'left' | 'center' | 'right' | 'default'
 
   // Content toggles
@@ -324,7 +355,7 @@ interface AccessifyState {
   highlightLinks: boolean
   textMagnifier: boolean
 
-  // Color toggles (mutually exclusive group: dark/light/high/monochrome/invert)
+  // Color toggles (dark/light/high/monochrome/invert are mutually exclusive)
   darkContrast: boolean
   lightContrast: boolean
   highContrast: boolean
@@ -348,48 +379,45 @@ type AccessibilityProfile =
 
 ## Accessibility Profiles
 
-Each profile applies a preset combination of settings. Selecting an active profile a second time resets all settings to defaults.
-
 | Profile | Applied settings |
 |---|---|
 | `seizure-safe` | Light contrast, monochrome |
 | `vision-impaired` | Font size +4, content scale +2, line height +2 |
 | `adhd-friendly` | Highlight links, highlight titles, readable font |
 | `cognitive-disability` | Highlight links, highlight titles, readable font, line height +2 |
-| `keyboard-navigation` | _(focus styles only — no state changes)_ |
-| `screen-reader` | _(screen reader optimized — no state changes)_ |
-| `color-blind` | Color blind filter (protanopia SVG matrix) |
+| `keyboard-navigation` | Skip-to-main link injection |
+| `screen-reader` | Screen reader optimised layout |
+| `color-blind` | Protanopia SVG filter |
 | `dyslexia` | Readable font, letter spacing +2, line height +2 |
+
+Selecting an active profile a second time resets all settings to defaults.
 
 ---
 
 ## DOM Isolation
 
-All effects (font size, filters, contrast) are scoped to a `#accessify-host` wrapper that contains the host page content. The widget UI is a **sibling** of this wrapper and is never affected by filters or contrast changes.
-
-This means effects like `filter: grayscale(100%)` or `filter: invert(100%)` only apply to the page content, not to the accessibility widget itself.
+All effects are scoped to a `#accessify-host` wrapper that contains the host page content. The widget UI is a **sibling** of this wrapper and is never affected by filters or contrast changes.
 
 ---
 
 ## Development
 
 ```bash
-# Install dependencies
 pnpm install
 
-# Build the package
+# Build
 pnpm --filter @glitchlab/accessify build
 
-# Watch mode
+# Watch
 pnpm --filter @glitchlab/accessify dev
 
-# Run tests
+# Test
 pnpm --filter @glitchlab/accessify test
 
-# Run tests in watch mode
+# Watch mode
 pnpm --filter @glitchlab/accessify test:watch
 
-# Coverage report
+# Coverage
 pnpm --filter @glitchlab/accessify test:coverage
 ```
 

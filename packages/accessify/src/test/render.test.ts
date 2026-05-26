@@ -154,4 +154,68 @@ describe('renderPanel', () => {
   it('renders close button', () => {
     expect(renderPanel(freshState(), 'M')).toContain('accessify-close')
   })
+
+  it('renders WCAG analyze button', () => {
+    expect(renderPanel(freshState(), 'M')).toContain('data-action="analyze"')
+  })
+
+  it('renders WCAG score when result is provided', () => {
+    const html = renderPanel(freshState(), 'M', 'en', { score: 85, issues: [] })
+    expect(html).toContain('accessify-wcag-score-circle')
+    expect(html).toContain('85')
+  })
+
+  it('shows no-issues message when scan returns empty', () => {
+    const html = renderPanel(freshState(), 'M', 'en', { score: 100, issues: [] })
+    expect(html).toContain('No issues found')
+  })
+
+  it('renders issue rows when scan finds problems', () => {
+    const html = renderPanel(freshState(), 'M', 'en', {
+      score: 60,
+      issues: [{ id: 'img-alt', severity: 'fail', message: 'Images missing alt text', count: 3 }],
+    })
+    expect(html).toContain('Images missing alt text')
+    expect(html).toContain('accessify-wcag-badge fail')
+  })
+
+  it('shows analyzing state when scanning', () => {
+    const html = renderPanel(freshState(), 'M', 'en', null, true)
+    expect(html).toContain('Analyzing')
+    expect(html).toContain('disabled')
+  })
+})
+
+describe('renderPanel — i18n', () => {
+  it('renders Spanish labels with lang=es', () => {
+    const html = renderPanel(freshState(), 'M', 'es')
+    expect(html).toContain('Configuración de Accesibilidad')
+    expect(html).toContain('Restablecer configuración')
+  })
+
+  it('renders French labels with lang=fr', () => {
+    const html = renderPanel(freshState(), 'M', 'fr')
+    expect(html).toContain("Paramètres d'Accessibilité")
+  })
+
+  it('renders German labels with lang=de', () => {
+    const html = renderPanel(freshState(), 'M', 'de')
+    expect(html).toContain('Barrierefreiheitseinstellungen')
+  })
+
+  it('renders Portuguese labels with lang=pt', () => {
+    const html = renderPanel(freshState(), 'M', 'pt')
+    expect(html).toContain('Configurações de Acessibilidade')
+  })
+
+  it('renders Arabic labels with lang=ar and dir=rtl', () => {
+    const html = renderPanel(freshState(), 'M', 'ar')
+    expect(html).toContain('إعدادات إمكانية الوصول')
+    expect(html).toContain('dir="rtl"')
+  })
+
+  it('falls back to English for unknown lang', () => {
+    const html = renderPanel(freshState(), 'M', 'en')
+    expect(html).toContain('Accessibility Settings')
+  })
 })

@@ -1,5 +1,6 @@
 import { applyEffects, clearEffects, ensureHostWrapper, unwrapHost } from './effects'
 import { ICONS } from './icons'
+import { trapFocus, releaseFocus, injectSkipLink, removeSkipLink } from './keyboard'
 import { renderPanel } from './render'
 import { buildStyles, DEFAULT_VARS, STYLE_ID, type StyleVars } from './styles'
 import {
@@ -8,14 +9,19 @@ import {
   type AccessibilityProfile,
   type AccessifyConfig,
   type AccessifyState,
+  type ColorScheme,
+  type Lang,
   type TextAlignment,
   type WidgetSize,
 } from './types'
+import { runWcagScan, type WcagResult } from './wcag'
 
 export type {
   AccessibilityProfile,
   AccessifyConfig,
   AccessifyState,
+  ColorScheme,
+  Lang,
   Position,
   TextAlignment,
   WidgetSize,
@@ -50,21 +56,29 @@ const COLOR_EXCLUSIVE: Array<keyof AccessifyState> = [
 export class Accessify {
   private readonly config: AccessifyConfig
   private size: WidgetSize
+  private lang: Lang
+  private scheme: ColorScheme
   private state: AccessifyState
   private root: HTMLDivElement | null = null
   private trigger: HTMLButtonElement | null = null
   private overlay: HTMLDivElement | null = null
   private panel: HTMLDivElement | null = null
   private isOpen = false
+  private wcagResult: WcagResult | null = null
+  private wcagScanning = false
+  private schemeMediaQuery: MediaQueryList | null = null
 
   constructor(config: AccessifyConfig = {}) {
     this.config = {
       position: 'bottom-right',
       persistence: true,
       lang: 'en',
+      colorScheme: 'auto',
       ...config,
     }
     this.size = config.size ?? 'M'
+    this.lang = config.lang ?? 'en'
+    this.scheme = config.colorScheme ?? 'auto'
     this.state = this.loadState()
   }
 
@@ -73,17 +87,22 @@ export class Accessify {
     this.injectStyles()
 
     if (!target) ensureHostWrapper()
+    if (this.state.profile === 'keyboard-navigation') {
+      injectSkipLink()
+    }
 
     this.root = document.createElement('div')
     this.root.className = 'accessify-root'
     this.root.setAttribute('role', 'complementary')
     this.root.setAttribute('aria-label', 'Accessibility Widget')
+    this.applyScheme()
 
     this.trigger = document.createElement('button')
     this.trigger.className = 'accessify-trigger'
     this.trigger.type = 'button'
     this.trigger.dataset.position = this.config.position!
     this.trigger.setAttribute('aria-label', 'Open accessibility menu')
+    this.trigger.setAttribute('aria-expanded', 'false')
     this.trigger.innerHTML = ICONS.wheelchair
     this.trigger.addEventListener('click', () => this.toggle())
 
@@ -103,6 +122,12 @@ export class Accessify {
     this.root.append(this.trigger, this.overlay, this.panel)
     ;(target ?? document.body).appendChild(this.root)
 
+    // Listen for OS color scheme changes when in auto mode
+    if (this.scheme === 'auto' && globalThis.window !== undefined) {
+      this.schemeMediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)')
+      this.schemeMediaQuery.addEventListener('change', this.onSchemeChange)
+    }
+
     this.update()
     applyEffects(this.state)
   }
@@ -110,6 +135,12 @@ export class Accessify {
   destroy(): void {
     clearEffects()
     unwrapHost()
+    releaseFocus()
+    removeSkipLink()
+    if (this.schemeMediaQuery) {
+      this.schemeMediaQuery.removeEventListener('change', this.onSchemeChange)
+      this.schemeMediaQuery = null
+    }
     if (this.root) {
       this.root.remove()
       this.root = null
@@ -121,13 +152,17 @@ export class Accessify {
 
   open(): void {
     this.isOpen = true
+    this.trigger?.setAttribute('aria-expanded', 'true')
     this.config.onOpen?.()
     this.update()
+    if (this.panel && this.trigger) trapFocus(this.panel, this.trigger)
   }
 
   close(): void {
     this.isOpen = false
+    this.trigger?.setAttribute('aria-expanded', 'false')
     this.config.onClose?.()
+    releaseFocus()
     this.update()
   }
 
@@ -158,61 +193,104 @@ export class Accessify {
     this.update()
   }
 
+  setLang(lang: Lang): void {
+    this.lang = lang
+    this.update()
+  }
+
+  setColorScheme(scheme: ColorScheme): void {
+    this.scheme = scheme
+    this.applyScheme()
+  }
+
+  private readonly onSchemeChange = (): void => {
+    this.applyScheme()
+  }
+
+  private resolvedScheme(): 'light' | 'dark' {
+    if (this.scheme === 'dark') return 'dark'
+    if (this.scheme === 'light') return 'light'
+    if (globalThis.window !== undefined && globalThis.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark'
+    return 'light'
+  }
+
+  private applyScheme(): void {
+    if (!this.root) return
+    this.root.dataset.scheme = this.resolvedScheme()
+  }
+
   private handlePanelClick(e: MouseEvent): void {
     const target = e.target as HTMLElement
-    const closeBtn = target.closest<HTMLElement>('.accessify-close')
-    if (closeBtn) {
-      this.close()
-      return
-    }
+    if (target.closest<HTMLElement>('.accessify-close')) { this.close(); return }
+    if (this.handleActionClick(target)) return
+    if (this.handleSizeClick(target)) return
+    if (this.handleProfileClick(target)) return
+    if (this.handleStepClick(target)) return
+    if (this.handleToggleClick(target)) return
+    if (this.handleAlignClick(target)) return
+    this.handleColorClick(target)
+  }
 
-    const resetBtn = target.closest<HTMLElement>('[data-action="reset"]')
-    if (resetBtn) {
-      this.reset()
-      return
-    }
+  private handleActionClick(target: HTMLElement): boolean {
+    const btn = target.closest<HTMLElement>('[data-action]')
+    if (!btn) return false
+    if (btn.dataset.action === 'reset') this.reset()
+    else if (btn.dataset.action === 'analyze') this.runAnalysis()
+    return true
+  }
 
-    const sizeBtn = target.closest<HTMLElement>('[data-size]')
-    if (sizeBtn && this.panel?.contains(sizeBtn) && sizeBtn.parentElement?.classList.contains('accessify-size-toggle')) {
-      this.setSize(sizeBtn.dataset.size as WidgetSize)
-      return
-    }
+  private handleSizeClick(target: HTMLElement): boolean {
+    const btn = target.closest<HTMLElement>('[data-size]')
+    if (!btn || !this.panel?.contains(btn) || !btn.parentElement?.classList.contains('accessify-size-toggle')) return false
+    this.setSize(btn.dataset.size as WidgetSize)
+    return true
+  }
 
-    const profileBtn = target.closest<HTMLElement>('[data-profile]')
-    if (profileBtn) {
-      this.toggleProfile(profileBtn.dataset.profile as AccessibilityProfile)
-      return
-    }
+  private handleProfileClick(target: HTMLElement): boolean {
+    const btn = target.closest<HTMLElement>('[data-profile]')
+    if (!btn) return false
+    this.toggleProfile(btn.dataset.profile as AccessibilityProfile)
+    return true
+  }
 
-    const stepBtn = target.closest<HTMLElement>('[data-step]')
-    if (stepBtn) {
-      const tile = stepBtn.closest<HTMLElement>('[data-stepper]')
-      if (tile) {
-        const key = tile.dataset.stepper as keyof AccessifyState
-        const delta = Number.parseInt(stepBtn.dataset.step!, 10)
-        this.adjustStepper(key, delta)
-      }
-      return
-    }
+  private handleStepClick(target: HTMLElement): boolean {
+    const btn = target.closest<HTMLElement>('[data-step]')
+    if (!btn) return false
+    const tile = btn.closest<HTMLElement>('[data-stepper]')
+    if (tile) this.adjustStepper(tile.dataset.stepper as keyof AccessifyState, Number.parseInt(btn.dataset.step!, 10))
+    return true
+  }
 
-    const toggleBtn = target.closest<HTMLElement>('[data-toggle]')
-    if (toggleBtn) {
-      this.toggleFlag(toggleBtn.dataset.toggle as keyof AccessifyState)
-      return
-    }
+  private handleToggleClick(target: HTMLElement): boolean {
+    const btn = target.closest<HTMLElement>('[data-toggle]')
+    if (!btn) return false
+    this.toggleFlag(btn.dataset.toggle as keyof AccessifyState)
+    return true
+  }
 
-    const alignBtn = target.closest<HTMLElement>('[data-align]')
-    if (alignBtn) {
-      const a = alignBtn.dataset.align as TextAlignment
-      this.state.textAlignment = this.state.textAlignment === a ? 'default' : a
-      this.commit()
-      return
-    }
+  private handleAlignClick(target: HTMLElement): boolean {
+    const btn = target.closest<HTMLElement>('[data-align]')
+    if (!btn) return false
+    const a = btn.dataset.align as TextAlignment
+    this.state.textAlignment = this.state.textAlignment === a ? 'default' : a
+    this.commit()
+    return true
+  }
 
-    const colorBtn = target.closest<HTMLElement>('[data-color]')
-    if (colorBtn) {
-      this.toggleColor(colorBtn.dataset.color as keyof AccessifyState)
-    }
+  private handleColorClick(target: HTMLElement): void {
+    const btn = target.closest<HTMLElement>('[data-color]')
+    if (btn) this.toggleColor(btn.dataset.color as keyof AccessifyState)
+  }
+
+  private async runAnalysis(): Promise<void> {
+    this.wcagScanning = true
+    this.update()
+    // Yield to allow re-render before scanning
+    await new Promise(r => setTimeout(r, 30))
+    const host = document.getElementById('accessify-host') ?? document.body
+    this.wcagResult = runWcagScan(host)
+    this.wcagScanning = false
+    this.update()
   }
 
   private toggleProfile(id: AccessibilityProfile): void {
@@ -222,6 +300,8 @@ export class Accessify {
       const preset = PROFILE_PRESETS[id] ?? {}
       this.state = { ...DEFAULT_STATE, profile: id, ...preset }
     }
+    if (this.state.profile === 'keyboard-navigation') injectSkipLink()
+    else removeSkipLink()
     this.commit()
   }
 
@@ -230,14 +310,14 @@ export class Accessify {
     if (!bounds) return
     const current = this.state[key] as number
     const next = Math.max(bounds[0], Math.min(bounds[1], current + delta))
-    ;(this.state as any)[key] = next
+    ;(this.state as unknown as Record<string, unknown>)[key] = next
     this.commit()
   }
 
   private toggleFlag(key: keyof AccessifyState): void {
     const v = this.state[key]
     if (typeof v !== 'boolean') return;
-    (this.state as any)[key] = !v
+    (this.state as unknown as Record<string, unknown>)[key] = !v
     this.commit()
   }
 
@@ -247,10 +327,10 @@ export class Accessify {
     const next = !current
     if (next && COLOR_EXCLUSIVE.includes(key)) {
       for (const k of COLOR_EXCLUSIVE) {
-        if (k !== key) (this.state as any)[k] = false
+        if (k !== key) (this.state as unknown as Record<string, unknown>)[k] = false
       }
     }
-    ;(this.state as any)[key] = next
+    ;(this.state as unknown as Record<string, unknown>)[key] = next
     this.commit()
   }
 
@@ -265,9 +345,10 @@ export class Accessify {
     this.panel.classList.toggle('open', this.isOpen)
     this.overlay?.classList.toggle('open', this.isOpen)
     const prevScroll = this.panel.querySelector<HTMLElement>('.accessify-body')?.scrollTop ?? 0
-    this.panel.innerHTML = renderPanel(this.state, this.size)
+    this.panel.innerHTML = renderPanel(this.state, this.size, this.lang, this.wcagResult, this.wcagScanning)
     const nextBody = this.panel.querySelector<HTMLElement>('.accessify-body')
     if (nextBody) nextBody.scrollTop = prevScroll
+    this.applyScheme()
   }
 
   private injectStyles(): void {
