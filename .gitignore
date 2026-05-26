@@ -1,0 +1,10 @@
+node_modules
+dist
+.turbo
+.next
+.nuxt
+.svelte-kit
+*.log
+.DS_Store
+.claude
+.vscode/settings.json
