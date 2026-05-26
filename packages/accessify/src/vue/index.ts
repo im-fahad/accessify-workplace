@@ -1,24 +1,31 @@
-import { ref, reactive, onMounted, onUnmounted, defineComponent, type App, type Plugin } from 'vue'
-import { Accessify, type AccessifyConfig, type AccessifyState } from '../core'
+import { ref, shallowRef, onMounted, onUnmounted, watch, defineComponent, type App, type Plugin, type PropType } from 'vue'
+import {
+  Accessify,
+  type AccessifyConfig,
+  type AccessifyState,
+  type ColorScheme,
+  type Lang,
+  type WidgetSize,
+} from '../core'
 
 export const AccessifyPlugin: Plugin = {
   install(app: App, options: AccessifyConfig = {}) {
+    if (typeof document === 'undefined') return
     const instance = new Accessify(options)
+    instance.mount()
     app.provide('accessify', instance)
     app.config.globalProperties.$accessify = instance
-
-    onMounted(() => instance.mount())
-    onUnmounted(() => instance.destroy())
   },
 }
 
 export function useAccessify(config: AccessifyConfig = {}) {
-  const instance = ref<Accessify | null>(null)
-  const state = reactive<{ value: AccessifyState | null }>({ value: null })
+  const instance = shallowRef<Accessify | null>(null)
+  const state = ref<AccessifyState | null>(null)
   const isOpen = ref(false)
 
   onMounted(() => {
     const a = new Accessify(config)
+    a.mount()
     instance.value = a
     state.value = a.getState()
   })
@@ -31,22 +38,17 @@ export function useAccessify(config: AccessifyConfig = {}) {
     instance.value?.open()
     isOpen.value = true
   }
-
   const close = () => {
     instance.value?.close()
     isOpen.value = false
   }
-
   const toggle = () => {
     instance.value?.toggle()
     isOpen.value = !isOpen.value
   }
-
   const reset = () => {
     instance.value?.reset()
-    if (instance.value) {
-      state.value = instance.value.getState()
-    }
+    if (instance.value) state.value = instance.value.getState()
   }
 
   return { open, close, toggle, reset, state, isOpen }
@@ -55,10 +57,12 @@ export function useAccessify(config: AccessifyConfig = {}) {
 export const AccessifyWidget = defineComponent({
   name: 'AccessifyWidget',
   props: {
-    position: { type: String, default: 'bottom-right' },
-    size: { type: String, default: 'M' },
+    position: { type: String as PropType<AccessifyConfig['position']>, default: 'bottom-right' },
+    size: { type: String as PropType<WidgetSize>, default: 'M' },
+    colorScheme: { type: String as PropType<ColorScheme>, default: 'light' },
+    lang: { type: String as PropType<Lang>, default: 'en' },
     persistence: { type: Boolean, default: true },
-    lang: { type: String, default: 'en' },
+    theme: { type: Object as PropType<AccessifyConfig['theme']>, default: undefined },
   },
   setup(props) {
     let instance: Accessify | null = null
@@ -71,6 +75,10 @@ export const AccessifyWidget = defineComponent({
     onUnmounted(() => {
       instance?.destroy()
     })
+
+    watch(() => props.colorScheme, v => { if (v) instance?.setColorScheme(v) })
+    watch(() => props.lang, v => { if (v) instance?.setLang(v) })
+    watch(() => props.size, v => { if (v) instance?.setSize(v) })
 
     return () => null
   },

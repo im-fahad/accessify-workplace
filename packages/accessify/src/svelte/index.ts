@@ -1,55 +1,40 @@
 import { writable } from 'svelte/store'
-import { Accessify, type AccessifyConfig, type AccessifyState } from '../core'
-
-const DEFAULT_STATE: AccessifyState = {
-  profile: null,
-  fontSize: 0,
-  contentScale: 1,
-  lineHeight: 1,
-  letterSpacing: 0,
-  textAlignment: 'default',
-  readableFont: false,
-  highlightTitles: false,
-  highlightLinks: false,
-  textMagnifier: false,
-  darkContrast: false,
-  lightContrast: false,
-  highContrast: false,
-  colorBlind: false,
-  monochrome: false,
-  invertColors: false,
-}
+import { Accessify, type AccessifyConfig, type AccessifyState, type ColorScheme, type Lang, type WidgetSize } from '../core'
 
 export function createAccessifyStore(config: AccessifyConfig = {}) {
   const instance = new Accessify(config)
   const state = writable<AccessifyState>(instance.getState())
   const isOpen = writable(false)
 
+  const sync = () => state.set(instance.getState())
+
   return {
     subscribe: state.subscribe,
-    isOpen,
-    mount: () => instance.mount(),
+    isOpen: { subscribe: isOpen.subscribe },
+    mount: () => { instance.mount(); sync() },
     destroy: () => instance.destroy(),
-    open: () => {
-      instance.open()
-      isOpen.set(true)
-    },
-    close: () => {
-      instance.close()
-      isOpen.set(false)
-    },
-    toggle: () => {
-      instance.toggle()
-      isOpen.update(v => !v)
-    },
-    reset: () => {
-      instance.reset()
-      state.set(instance.getState())
-    },
+    open: () => { instance.open(); isOpen.set(true) },
+    close: () => { instance.close(); isOpen.set(false) },
+    toggle: () => { instance.toggle(); isOpen.update(v => !v) },
+    reset: () => { instance.reset(); sync() },
+    setSize: (size: WidgetSize) => { instance.setSize(size); sync() },
+    setLang: (lang: Lang) => { instance.setLang(lang); sync() },
+    setColorScheme: (scheme: ColorScheme) => { instance.setColorScheme(scheme); sync() },
   }
 }
 
-export const accessifyStore = createAccessifyStore()
+let _defaultStore: ReturnType<typeof createAccessifyStore> | null = null
+
+/**
+ * Default singleton store. Lazily created so it doesn't construct an
+ * Accessify instance during SSR module evaluation.
+ */
+export const accessifyStore = new Proxy({} as ReturnType<typeof createAccessifyStore>, {
+  get(_, prop) {
+    _defaultStore ??= createAccessifyStore()
+    return Reflect.get(_defaultStore as object, prop)
+  },
+})
 
 export type { AccessifyConfig, AccessifyState } from '../core'
 export { Accessify } from '../core'
