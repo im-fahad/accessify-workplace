@@ -1,4 +1,4 @@
-import { ref, reactive, onMounted, onUnmounted, defineComponent, h, type App, type Plugin } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, defineComponent, type App, type Plugin } from 'vue'
 import { Accessify, type AccessifyConfig, type AccessifyState } from '../core'
 
 export const AccessifyPlugin: Plugin = {
@@ -61,21 +61,18 @@ export const AccessifyWidget = defineComponent({
     lang: { type: String, default: 'en' },
   },
   setup(props) {
-    const containerRef = ref<HTMLElement | null>(null)
     let instance: Accessify | null = null
 
     onMounted(() => {
       instance = new Accessify(props as AccessifyConfig)
-      if (containerRef.value) {
-        instance.mount(containerRef.value)
-      }
+      instance.mount()
     })
 
     onUnmounted(() => {
       instance?.destroy()
     })
 
-    return () => h('div', { ref: containerRef })
+    return () => null
   },
 })
 

@@ -4,7 +4,6 @@ import { Accessify, type AccessifyConfig, type AccessifyState } from '../core'
 export type AccessifyWidgetProps = AccessifyConfig
 
 export function AccessifyWidget(props: AccessifyWidgetProps) {
-  const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<Accessify | null>(null)
   const propsRef = useRef<AccessifyWidgetProps>(props)
   propsRef.current = props
@@ -12,10 +11,7 @@ export function AccessifyWidget(props: AccessifyWidgetProps) {
   useEffect(() => {
     const instance = new Accessify(propsRef.current)
     instanceRef.current = instance
-
-    if (containerRef.current) {
-      instance.mount(containerRef.current)
-    }
+    instance.mount()
 
     return () => {
       instance.destroy()
@@ -38,7 +34,7 @@ export function AccessifyWidget(props: AccessifyWidgetProps) {
     if (props.size) instanceRef.current.setSize(props.size)
   }, [props.size])
 
-  return <div ref={containerRef} />
+  return null
 }
 
 export function useAccessify(config: AccessifyConfig = {}) {

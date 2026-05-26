@@ -28,7 +28,7 @@ export function createAccessifyStore(config: AccessifyConfig = {}) {
   return {
     subscribe: state.subscribe,
     isOpen,
-    mount: (target?: HTMLElement) => instance.mount(target),
+    mount: () => instance.mount(),
     destroy: () => instance.destroy(),
     open: () => {
       instance.open()

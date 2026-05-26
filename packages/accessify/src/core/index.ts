@@ -81,7 +81,7 @@ export class Accessify {
     this.state = this.loadState()
   }
 
-  mount(target?: HTMLElement): void {
+  mount(): void {
     if (typeof document === 'undefined') return
     this.injectStyles()
 
@@ -120,8 +120,10 @@ export class Accessify {
     this.panel.addEventListener('click', e => this.handlePanelClick(e))
 
     this.root.append(this.trigger, this.overlay, this.panel)
-    ;(target ?? document.body).appendChild(this.root)
-
+    // Always append to <body> directly so the widget lives as a sibling
+    // of #accessify-host and is never affected by the effects (font-size,
+    // contrast, filters etc) applied to the page content wrapper.
+    document.body.appendChild(this.root)
 
     this.update()
     applyEffects(this.state)
