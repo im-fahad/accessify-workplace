@@ -12,7 +12,7 @@ export type AccessibilityProfile =
   | 'color-blind'
   | 'dyslexia'
 
-export type ColorScheme = 'light' | 'dark' | 'auto'
+export type ColorScheme = 'light' | 'dark'
 export type Lang = 'en' | 'ar' | 'es' | 'fr' | 'de' | 'pt'
 
 export interface AccessifyConfig {

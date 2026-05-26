@@ -45,7 +45,7 @@ import { Accessify } from '@glitchlab/accessify'
 const widget = new Accessify({
   position: 'bottom-right',
   size: 'M',
-  colorScheme: 'auto', // 'light' | 'dark' | 'auto'
+  colorScheme: 'light', // 'light' | 'dark'
   lang: 'en',          // 'en' | 'es' | 'fr' | 'de' | 'pt' | 'ar'
 })
 
@@ -102,8 +102,8 @@ interface AccessifyConfig {
   /** Panel size. Default: 'M' */
   size?: 'S' | 'M' | 'L'
 
-  /** Color scheme for the widget UI. Default: 'auto' (follows OS preference) */
-  colorScheme?: 'light' | 'dark' | 'auto'
+  /** Color scheme for the widget UI. Default: 'light' */
+  colorScheme?: 'light' | 'dark'
 
   /** Panel language. Default: 'en' */
   lang?: 'en' | 'es' | 'fr' | 'de' | 'pt' | 'ar'
@@ -152,20 +152,18 @@ const widget = new Accessify(config?)
 
 ## Dark Mode
 
-The widget auto-detects the OS color scheme by default (`colorScheme: 'auto'`). You can override it:
+The widget is light by default. Pass `colorScheme: 'dark'` to enable dark mode:
 
 ```ts
-// Always dark
-new Accessify({ colorScheme: 'dark' })
-
-// Always light
+// Light (default)
 new Accessify({ colorScheme: 'light' })
 
-// Follow OS (default)
-new Accessify({ colorScheme: 'auto' })
+// Dark
+new Accessify({ colorScheme: 'dark' })
 
 // Change at runtime
 widget.setColorScheme('dark')
+widget.setColorScheme('light')
 ```
 
 ---

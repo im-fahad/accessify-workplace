@@ -537,6 +537,16 @@ div.accessify-tile { cursor: default; }
 }
 
 /* ── Dark mode ── */
+/* Explicit light override — wins over OS preference and data-scheme="dark" */
+.accessify-root[data-scheme="light"] {
+  --acc-primary: #0c0c0c;
+  --acc-primary-dark: #18181b;
+  --acc-bg: #ffffff;
+  --acc-text: #0c0c0c;
+  --acc-border: #e4e4e7;
+  --acc-muted: #71717a;
+  --acc-surface: #f4f4f5;
+}
 .accessify-root[data-scheme="dark"] {
   --acc-primary: #fafafa;
   --acc-primary-dark: #e4e4e7;

@@ -66,19 +66,18 @@ export class Accessify {
   private isOpen = false
   private wcagResult: WcagResult | null = null
   private wcagScanning = false
-  private schemeMediaQuery: MediaQueryList | null = null
 
   constructor(config: AccessifyConfig = {}) {
     this.config = {
       position: 'bottom-right',
       persistence: true,
       lang: 'en',
-      colorScheme: 'auto',
+      colorScheme: 'light',
       ...config,
     }
-    this.size = config.size ?? 'M'
-    this.lang = config.lang ?? 'en'
-    this.scheme = config.colorScheme ?? 'auto'
+    this.size = this.config.size ?? 'M'
+    this.lang = this.config.lang ?? 'en'
+    this.scheme = this.config.colorScheme ?? 'light'
     this.state = this.loadState()
   }
 
@@ -95,7 +94,7 @@ export class Accessify {
     this.root.className = 'accessify-root'
     this.root.setAttribute('role', 'complementary')
     this.root.setAttribute('aria-label', 'Accessibility Widget')
-    this.applyScheme()
+    this.root.dataset.scheme = this.scheme === 'dark' ? 'dark' : 'light'
 
     this.trigger = document.createElement('button')
     this.trigger.className = 'accessify-trigger'
@@ -122,11 +121,6 @@ export class Accessify {
     this.root.append(this.trigger, this.overlay, this.panel)
     ;(target ?? document.body).appendChild(this.root)
 
-    // Listen for OS color scheme changes when in auto mode
-    if (this.scheme === 'auto' && globalThis.window !== undefined) {
-      this.schemeMediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)')
-      this.schemeMediaQuery.addEventListener('change', this.onSchemeChange)
-    }
 
     this.update()
     applyEffects(this.state)
@@ -137,10 +131,6 @@ export class Accessify {
     unwrapHost()
     releaseFocus()
     removeSkipLink()
-    if (this.schemeMediaQuery) {
-      this.schemeMediaQuery.removeEventListener('change', this.onSchemeChange)
-      this.schemeMediaQuery = null
-    }
     if (this.root) {
       this.root.remove()
       this.root = null
@@ -203,20 +193,9 @@ export class Accessify {
     this.applyScheme()
   }
 
-  private readonly onSchemeChange = (): void => {
-    this.applyScheme()
-  }
-
-  private resolvedScheme(): 'light' | 'dark' {
-    if (this.scheme === 'dark') return 'dark'
-    if (this.scheme === 'light') return 'light'
-    if (globalThis.window !== undefined && globalThis.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark'
-    return 'light'
-  }
-
   private applyScheme(): void {
     if (!this.root) return
-    this.root.dataset.scheme = this.resolvedScheme()
+    this.root.dataset.scheme = this.scheme === 'dark' ? 'dark' : 'light'
   }
 
   private handlePanelClick(e: MouseEvent): void {
