@@ -6,9 +6,11 @@ export type AccessifyWidgetProps = AccessifyConfig
 export function AccessifyWidget(props: AccessifyWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<Accessify | null>(null)
+  const propsRef = useRef<AccessifyWidgetProps>(props)
+  propsRef.current = props
 
   useEffect(() => {
-    const instance = new Accessify(props)
+    const instance = new Accessify(propsRef.current)
     instanceRef.current = instance
 
     if (containerRef.current) {
@@ -20,6 +22,21 @@ export function AccessifyWidget(props: AccessifyWidgetProps) {
       instanceRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    if (!instanceRef.current) return
+    if (props.colorScheme) instanceRef.current.setColorScheme(props.colorScheme)
+  }, [props.colorScheme])
+
+  useEffect(() => {
+    if (!instanceRef.current) return
+    if (props.lang) instanceRef.current.setLang(props.lang)
+  }, [props.lang])
+
+  useEffect(() => {
+    if (!instanceRef.current) return
+    if (props.size) instanceRef.current.setSize(props.size)
+  }, [props.size])
 
   return <div ref={containerRef} />
 }

@@ -51,6 +51,23 @@ describe('AccessifyWidget', () => {
     const panel = document.querySelector<HTMLElement>('.accessify-panel')
     expect(panel?.dataset.size).toBe('S')
   })
+
+  it('applies colorScheme="dark" to root data-scheme', () => {
+    render(<AccessifyWidget colorScheme="dark" />)
+    const root = document.querySelector<HTMLElement>('.accessify-root')
+    expect(root?.dataset.scheme).toBe('dark')
+  })
+
+  it('applies colorScheme="light" to root data-scheme', () => {
+    render(<AccessifyWidget colorScheme="light" />)
+    const root = document.querySelector<HTMLElement>('.accessify-root')
+    expect(root?.dataset.scheme).toBe('light')
+  })
+
+  it('only one accessify-root when AccessifyWidget is rendered once', () => {
+    render(<AccessifyWidget colorScheme="dark" />)
+    expect(document.querySelectorAll('.accessify-root').length).toBe(1)
+  })
 })
 
 // Helper component that exposes useAccessify return values via data attributes

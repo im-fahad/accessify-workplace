@@ -61,7 +61,7 @@ export default function App() {
   return (
     <>
       <YourApp />
-      <AccessifyWidget position="bottom-right" size="M" colorScheme="auto" lang="en" />
+      <AccessifyWidget position="bottom-right" size="M" colorScheme="light" lang="en" />
     </>
   )
 }
@@ -233,7 +233,7 @@ import { AccessifyWidget } from '@glitchlab/accessify/react'
 <AccessifyWidget
   position="bottom-right"
   size="M"
-  colorScheme="auto"
+  colorScheme="dark"
   lang="en"
   theme={{ primary: '#6d28d9' }}
   persistence={true}
@@ -241,6 +241,11 @@ import { AccessifyWidget } from '@glitchlab/accessify/react'
   onClose={() => {}}
   onReset={() => {}}
 />
+```
+
+The `colorScheme`, `lang`, and `size` props are **reactive** — changing them after mount will update the widget at runtime.
+
+```tsx
 ```
 
 ### `useAccessify(config?)`
