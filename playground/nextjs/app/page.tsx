@@ -43,7 +43,7 @@ function CopyButton({ text }: { text: string }) {
 export default function Home() {
   const [config, setConfig] = useState<WidgetConfig>(DEFAULT_CONFIG)
 
-  const theme = config.primary !== '#0c0c0c' ? { primary: config.primary } : undefined
+  const theme = { primary: config.primary }
 
   return (
     <div className="layout">
@@ -203,7 +203,7 @@ export default function Home() {
 
       {/* The actual widget — driven by sidebar config */}
       <AccessifyWidget
-        key={`${config.position}-${config.colorScheme}-${config.lang}-${config.persistence}`}
+        key={`${config.position}-${config.size}-${config.colorScheme}-${config.lang}-${config.persistence}-${config.primary}`}
         position={config.position}
         size={config.size}
         colorScheme={config.colorScheme}

@@ -69,8 +69,8 @@ importers:
   playground/nextjs:
     dependencies:
       '@glitchlab/accessify':
-        specifier: ^0.1.2
-        version: 0.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(svelte@4.2.20)(vue@3.5.34(typescript@5.9.3))
+        specifier: ^0.1.4
+        version: 0.1.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(svelte@4.2.20)(vue@3.5.34(typescript@5.9.3))
       next:
         specifier: ^14.2.0
         version: 14.2.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -929,8 +929,8 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@glitchlab/accessify@0.1.2':
-    resolution: {integrity: sha512-5s30Gm9I6Vpp0PuZz6XFOG66fb14hb+e15DpBIDyXRNSHoKItC/IoaaRSxfGp/ObcMccBpym7cpVDYBC5tnsTA==}
+  '@glitchlab/accessify@0.1.4':
+    resolution: {integrity: sha512-0fsnhGeNc+yQYyIyMT3IPw3f2Ny/4ClDlb2QKvZ6+tx+5+vCoj9o1CIxt7tS6qbw1+KUFUq4DM/6FyP9j5PxwQ==}
     peerDependencies:
       react: '>=17'
       react-dom: '>=17'
@@ -5269,7 +5269,7 @@ snapshots:
 
   '@exodus/bytes@1.15.1': {}
 
-  '@glitchlab/accessify@0.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(svelte@4.2.20)(vue@3.5.34(typescript@5.9.3))':
+  '@glitchlab/accessify@0.1.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(svelte@4.2.20)(vue@3.5.34(typescript@5.9.3))':
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)

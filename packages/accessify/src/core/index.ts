@@ -2,7 +2,7 @@ import { applyEffects, clearEffects, ensureHostWrapper, unwrapHost } from './eff
 import { ICONS } from './icons'
 import { trapFocus, releaseFocus, injectSkipLink, removeSkipLink } from './keyboard'
 import { renderPanel } from './render'
-import { buildStyles, DEFAULT_VARS, STYLE_ID, type StyleVars } from './styles'
+import { buildStyles, DEFAULT_VARS, STYLE_ID } from './styles'
 import {
   DEFAULT_STATE,
   STORAGE_KEY,
@@ -95,6 +95,7 @@ export class Accessify {
     this.root.setAttribute('role', 'complementary')
     this.root.setAttribute('aria-label', 'Accessibility Widget')
     this.root.dataset.scheme = this.scheme === 'dark' ? 'dark' : 'light'
+    this.applyTheme()
 
     this.trigger = document.createElement('button')
     this.trigger.className = 'accessify-trigger'
@@ -196,6 +197,15 @@ export class Accessify {
   private applyScheme(): void {
     if (!this.root) return
     this.root.dataset.scheme = this.scheme === 'dark' ? 'dark' : 'light'
+  }
+
+  private applyTheme(): void {
+    if (!this.root) return
+    const t = this.config.theme
+    if (!t) return
+    if (t.primary) this.root.style.setProperty('--acc-primary', t.primary)
+    if (t.background) this.root.style.setProperty('--acc-bg', t.background)
+    if (t.text) this.root.style.setProperty('--acc-text', t.text)
   }
 
   private handlePanelClick(e: MouseEvent): void {
@@ -333,13 +343,9 @@ export class Accessify {
   private injectStyles(): void {
     if (typeof document === 'undefined') return
     if (document.getElementById(STYLE_ID)) return
-    const vars: StyleVars = { ...DEFAULT_VARS }
-    if (this.config.theme?.primary) vars.primary = this.config.theme.primary
-    if (this.config.theme?.background) vars.background = this.config.theme.background
-    if (this.config.theme?.text) vars.text = this.config.theme.text
     const style = document.createElement('style')
     style.id = STYLE_ID
-    style.textContent = buildStyles(vars)
+    style.textContent = buildStyles(DEFAULT_VARS)
     document.head.appendChild(style)
   }
 
