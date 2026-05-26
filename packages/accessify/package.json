@@ -1,6 +1,6 @@
 {
   "name": "@glitchlab/accessify",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "license": "MIT",
   "main": "./dist/core.cjs.js",
   "module": "./dist/core.esm.js",

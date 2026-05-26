@@ -85,7 +85,7 @@ export class Accessify {
     if (typeof document === 'undefined') return
     this.injectStyles()
 
-    if (!target) ensureHostWrapper()
+    ensureHostWrapper()
     if (this.state.profile === 'keyboard-navigation') {
       injectSkipLink()
     }

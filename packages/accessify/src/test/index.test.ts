@@ -66,12 +66,12 @@ describe('Accessify — mount / destroy', () => {
     a.destroy()
   })
 
-  it('does NOT create host wrapper when custom target given', () => {
+  it('always creates host wrapper so effects work, even with custom target', () => {
     const container = document.createElement('div')
     document.body.appendChild(container)
     const a = new Accessify()
     a.mount(container)
-    expect(document.getElementById(HOST_WRAPPER_ID)).toBeNull()
+    expect(document.getElementById(HOST_WRAPPER_ID)).not.toBeNull()
     a.destroy()
   })
 
