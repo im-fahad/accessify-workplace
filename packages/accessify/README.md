@@ -1,8 +1,16 @@
 # @glitchlab/accessify
 
+[![npm version](https://img.shields.io/npm/v/@glitchlab/accessify.svg)](https://www.npmjs.com/package/@glitchlab/accessify)
+[![license](https://img.shields.io/npm/l/@glitchlab/accessify.svg)](https://github.com/im-fahad/accessify/blob/master/LICENSE)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/@glitchlab/accessify.svg)](https://bundlephobia.com/package/@glitchlab/accessify)
+
 A lightweight, framework-agnostic accessibility widget for the web. Drop it into any site to give users control over font size, contrast, color filters, dyslexia aids, and more — with zero runtime dependencies.
 
 Works as a plain JavaScript class or with first-class bindings for **React**, **Vue 3**, and **Svelte**.
+
+**[🔗 Live Demo →](https://accessify-playground.vercel.app/)**
+
+![Accessify widget demo](https://accessify-playground.vercel.app/demo.gif)
 
 ---
 
