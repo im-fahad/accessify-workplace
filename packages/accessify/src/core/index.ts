@@ -49,6 +49,7 @@ const COLOR_EXCLUSIVE: Array<keyof AccessifyState> = [
 
 export class Accessify {
   private readonly config: AccessifyConfig
+  private size: WidgetSize
   private state: AccessifyState
   private root: HTMLDivElement | null = null
   private trigger: HTMLButtonElement | null = null
@@ -59,11 +60,11 @@ export class Accessify {
   constructor(config: AccessifyConfig = {}) {
     this.config = {
       position: 'bottom-right',
-      size: 'M',
       persistence: true,
       lang: 'en',
       ...config,
     }
+    this.size = config.size ?? 'M'
     this.state = this.loadState()
   }
 
@@ -96,7 +97,7 @@ export class Accessify {
     this.panel.setAttribute('aria-modal', 'true')
     this.panel.setAttribute('aria-label', 'Accessibility settings')
     this.panel.dataset.position = this.config.position!
-    this.panel.dataset.size = this.config.size!
+    this.panel.dataset.size = this.size
     this.panel.addEventListener('click', e => this.handlePanelClick(e))
 
     this.root.append(this.trigger, this.overlay, this.panel)
@@ -152,7 +153,7 @@ export class Accessify {
   }
 
   setSize(size: WidgetSize): void {
-    this.config.size = size
+    this.size = size
     if (this.panel) this.panel.dataset.size = size
     this.update()
   }
@@ -162,6 +163,12 @@ export class Accessify {
     const closeBtn = target.closest<HTMLElement>('.accessify-close')
     if (closeBtn) {
       this.close()
+      return
+    }
+
+    const resetBtn = target.closest<HTMLElement>('[data-action="reset"]')
+    if (resetBtn) {
+      this.reset()
       return
     }
 
@@ -229,8 +236,8 @@ export class Accessify {
 
   private toggleFlag(key: keyof AccessifyState): void {
     const v = this.state[key]
-    if (typeof v !== 'boolean') return
-    ;(this.state as any)[key] = !v
+    if (typeof v !== 'boolean') return;
+    (this.state as any)[key] = !v
     this.commit()
   }
 
@@ -258,7 +265,7 @@ export class Accessify {
     this.panel.classList.toggle('open', this.isOpen)
     this.overlay?.classList.toggle('open', this.isOpen)
     const prevScroll = this.panel.querySelector<HTMLElement>('.accessify-body')?.scrollTop ?? 0
-    this.panel.innerHTML = renderPanel(this.state, this.config.size ?? 'M')
+    this.panel.innerHTML = renderPanel(this.state, this.size)
     const nextBody = this.panel.querySelector<HTMLElement>('.accessify-body')
     if (nextBody) nextBody.scrollTop = prevScroll
   }

@@ -2,6 +2,26 @@ import type { AccessifyState } from './types'
 
 const HOST_STYLE_ID = 'accessify-host-effects'
 export const HOST_WRAPPER_ID = 'accessify-host'
+const COLOR_BLIND_FILTER_ID = 'acc-protanopia-filter'
+
+function ensureColorBlindFilter(): void {
+  if (document.getElementById(COLOR_BLIND_FILTER_ID)) return
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  svg.id = COLOR_BLIND_FILTER_ID
+  svg.setAttribute('aria-hidden', 'true')
+  svg.style.cssText = 'position:absolute;width:0;height:0;pointer-events:none;'
+  svg.innerHTML = `
+    <defs>
+      <filter id="acc-protanopia">
+        <feColorMatrix type="matrix" values="
+          0.567 0.433 0 0 0
+          0.558 0.442 0 0 0
+          0     0.242 0.758 0 0
+          0     0     0 1 0"/>
+      </filter>
+    </defs>`
+  document.body.appendChild(svg)
+}
 
 function ensureHostStyle(): HTMLStyleElement {
   let el = document.getElementById(HOST_STYLE_ID) as HTMLStyleElement | null
@@ -49,26 +69,27 @@ const LS_STEP = 0.05
 function dynamicCss(state: AccessifyState): string {
   const rules: string[] = []
   const scope = `#${HOST_WRAPPER_ID}`
-  const target = `${scope} *`
 
   if (state.fontSize !== 0) {
-    const factor = 1 + state.fontSize * FONT_STEP
-    rules.push(`${target} { font-size: calc(1em * ${factor}) !important; }`)
+    const pct = 100 + state.fontSize * FONT_STEP * 100
+    // Set on wrapper so inheritance does the work — avoids compounding on nested elements
+    rules.push(`${scope} { font-size: ${pct}% !important; }`)
   }
   if (state.contentScale !== 0) {
     const factor = 1 + state.contentScale * SCALE_STEP
-    rules.push(`${scope} { zoom: ${factor}; }`)
+    // zoom for Chromium/Safari, transform+origin for Firefox
+    rules.push(`${scope} { zoom: ${factor}; transform: scale(${factor}); transform-origin: top left; }`)
   }
   if (state.lineHeight !== 0) {
     const lh = 1.5 + state.lineHeight * LH_STEP
-    rules.push(`${target} { line-height: ${lh} !important; }`)
+    rules.push(`${scope} * { line-height: ${lh} !important; }`)
   }
   if (state.letterSpacing !== 0) {
     const ls = state.letterSpacing * LS_STEP
-    rules.push(`${target} { letter-spacing: ${ls}em !important; }`)
+    rules.push(`${scope} * { letter-spacing: ${ls}em !important; }`)
   }
   if (state.textAlignment !== 'default') {
-    rules.push(`${target} { text-align: ${state.textAlignment} !important; }`)
+    rules.push(`${scope} * { text-align: ${state.textAlignment} !important; }`)
   }
   return rules.join('\n')
 }
@@ -135,6 +156,7 @@ export function applyEffects(state: AccessifyState): void {
   for (const [cls, on] of toggles) {
     wrapper.classList.toggle(cls, on)
   }
+  if (state.colorBlind) ensureColorBlindFilter()
   ensureHostStyle().textContent = dynamicCss(state)
   if (state.textMagnifier) enableMagnifier()
   else disableMagnifier()
@@ -150,5 +172,6 @@ export function clearEffects(): void {
   }
   const host = document.getElementById(HOST_STYLE_ID)
   if (host) host.textContent = ''
+  document.getElementById(COLOR_BLIND_FILTER_ID)?.remove()
   disableMagnifier()
 }

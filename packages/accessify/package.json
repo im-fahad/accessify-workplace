@@ -27,33 +27,53 @@
       "types": "./dist/svelte.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "peerDependencies": {
     "react": ">=17",
     "react-dom": ">=17",
-    "vue": ">=3",
-    "svelte": ">=4"
+    "svelte": ">=4",
+    "vue": ">=3"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "react-dom": { "optional": true },
-    "vue": { "optional": true },
-    "svelte": { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "tsup": "^8.3.0",
-    "typescript": "^5.7.0",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "vue": "^3.5.0",
-    "svelte": "^4.2.0"
+    "@vitest/coverage-v8": "^4.1.7",
+    "happy-dom": "^20.9.0",
+    "jsdom": "^29.1.1",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "svelte": "^4.2.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.7",
+    "vue": "^3.5.0"
   },
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "lint": "tsc --noEmit",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   }
 }
