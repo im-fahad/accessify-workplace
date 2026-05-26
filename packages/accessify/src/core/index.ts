@@ -86,7 +86,7 @@ export class Accessify {
     this.injectStyles()
 
     ensureHostWrapper()
-    if (this.state.profile === 'keyboard-navigation') {
+    if (this.state.profile === 'keyboard-navigation' || this.state.profile === 'screen-reader') {
       injectSkipLink()
     }
 
@@ -291,8 +291,11 @@ export class Accessify {
       const preset = PROFILE_PRESETS[id] ?? {}
       this.state = { ...DEFAULT_STATE, profile: id, ...preset }
     }
-    if (this.state.profile === 'keyboard-navigation') injectSkipLink()
-    else removeSkipLink()
+    if (this.state.profile === 'keyboard-navigation' || this.state.profile === 'screen-reader') {
+      injectSkipLink()
+    } else {
+      removeSkipLink()
+    }
     this.commit()
   }
 

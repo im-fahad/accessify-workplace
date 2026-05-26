@@ -408,4 +408,43 @@ describe('Accessify — keyboard navigation profile', () => {
     expect(document.getElementById('accessify-skip-link')).toBeNull()
     a.destroy()
   })
+
+  it('adds acc-keyboard-nav class to host when keyboard-navigation profile is activated', () => {
+    const a = new Accessify()
+    a.mount()
+    document.querySelector<HTMLButtonElement>('.accessify-panel [data-profile="keyboard-navigation"]')!.click()
+    expect(document.getElementById('accessify-host')?.classList.contains('acc-keyboard-nav')).toBe(true)
+    a.destroy()
+  })
+})
+
+describe('Accessify — screen-reader profile', () => {
+  it('adds acc-screen-reader class to host when activated', () => {
+    const a = new Accessify()
+    a.mount()
+    document.querySelector<HTMLButtonElement>('.accessify-panel [data-profile="screen-reader"]')!.click()
+    expect(document.getElementById('accessify-host')?.classList.contains('acc-screen-reader')).toBe(true)
+    a.destroy()
+  })
+
+  it('injects skip link when screen-reader profile is activated', () => {
+    const a = new Accessify()
+    a.mount()
+    const main = document.createElement('main')
+    main.id = 'main'
+    document.body.appendChild(main)
+    document.querySelector<HTMLButtonElement>('.accessify-panel [data-profile="screen-reader"]')!.click()
+    expect(document.getElementById('accessify-skip-link')).not.toBeNull()
+    a.destroy()
+  })
+
+  it('removes acc-screen-reader class when deactivated', () => {
+    const a = new Accessify()
+    a.mount()
+    const btn = () => document.querySelector<HTMLButtonElement>('.accessify-panel [data-profile="screen-reader"]')!
+    btn().click()
+    btn().click()
+    expect(document.getElementById('accessify-host')?.classList.contains('acc-screen-reader')).toBe(false)
+    a.destroy()
+  })
 })

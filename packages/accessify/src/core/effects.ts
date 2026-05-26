@@ -152,6 +152,8 @@ export function applyEffects(state: AccessifyState): void {
     ['acc-invert', state.invertColors],
     ['acc-color-blind', state.colorBlind],
     ['acc-text-magnifier', state.textMagnifier],
+    ['acc-keyboard-nav', state.profile === 'keyboard-navigation'],
+    ['acc-screen-reader', state.profile === 'screen-reader'],
   ]
   for (const [cls, on] of toggles) {
     wrapper.classList.toggle(cls, on)

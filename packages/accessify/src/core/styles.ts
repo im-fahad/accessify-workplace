@@ -496,6 +496,98 @@ div.accessify-tile { cursor: default; }
 #accessify-host.acc-invert { filter: invert(100%) hue-rotate(180deg) !important; }
 #accessify-host.acc-color-blind { filter: url('#acc-protanopia') !important; }
 
+/* ── Keyboard Navigation profile ──
+   Strong, always-visible focus rings on every interactive element so
+   keyboard users can clearly see what's focused. */
+#accessify-host.acc-keyboard-nav a:focus,
+#accessify-host.acc-keyboard-nav button:focus,
+#accessify-host.acc-keyboard-nav input:focus,
+#accessify-host.acc-keyboard-nav select:focus,
+#accessify-host.acc-keyboard-nav textarea:focus,
+#accessify-host.acc-keyboard-nav [tabindex]:focus,
+#accessify-host.acc-keyboard-nav summary:focus,
+#accessify-host.acc-keyboard-nav [role="button"]:focus,
+#accessify-host.acc-keyboard-nav [role="link"]:focus {
+  outline: 3px solid #2563eb !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.25) !important;
+  border-radius: 2px;
+}
+#accessify-host.acc-keyboard-nav a:hover,
+#accessify-host.acc-keyboard-nav button:hover {
+  outline: 2px dashed #2563eb !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Screen Reader profile ──
+   Visually reinforce semantic landmarks and ensure links/headings are
+   distinguishable. Show hidden landmarks visually. Enlarge tap targets. */
+#accessify-host.acc-screen-reader main,
+#accessify-host.acc-screen-reader [role="main"],
+#accessify-host.acc-screen-reader nav,
+#accessify-host.acc-screen-reader [role="navigation"],
+#accessify-host.acc-screen-reader header,
+#accessify-host.acc-screen-reader [role="banner"],
+#accessify-host.acc-screen-reader footer,
+#accessify-host.acc-screen-reader [role="contentinfo"],
+#accessify-host.acc-screen-reader aside,
+#accessify-host.acc-screen-reader [role="complementary"],
+#accessify-host.acc-screen-reader section,
+#accessify-host.acc-screen-reader article,
+#accessify-host.acc-screen-reader form {
+  outline: 2px dashed rgba(37, 99, 235, 0.55) !important;
+  outline-offset: 4px !important;
+  position: relative;
+}
+#accessify-host.acc-screen-reader main::before { content: 'main'; }
+#accessify-host.acc-screen-reader nav::before { content: 'nav'; }
+#accessify-host.acc-screen-reader header::before { content: 'header'; }
+#accessify-host.acc-screen-reader footer::before { content: 'footer'; }
+#accessify-host.acc-screen-reader aside::before { content: 'aside'; }
+#accessify-host.acc-screen-reader section::before { content: 'section'; }
+#accessify-host.acc-screen-reader article::before { content: 'article'; }
+#accessify-host.acc-screen-reader form::before { content: 'form'; }
+#accessify-host.acc-screen-reader main::before,
+#accessify-host.acc-screen-reader nav::before,
+#accessify-host.acc-screen-reader header::before,
+#accessify-host.acc-screen-reader footer::before,
+#accessify-host.acc-screen-reader aside::before,
+#accessify-host.acc-screen-reader section::before,
+#accessify-host.acc-screen-reader article::before,
+#accessify-host.acc-screen-reader form::before {
+  position: absolute;
+  top: -10px;
+  left: 8px;
+  background: #2563eb;
+  color: #fff;
+  font: 600 10px/1 -apple-system, sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 1;
+}
+#accessify-host.acc-screen-reader a {
+  text-decoration: underline !important;
+  text-underline-offset: 3px !important;
+}
+#accessify-host.acc-screen-reader img:not([alt]),
+#accessify-host.acc-screen-reader img[alt=""] {
+  outline: 3px solid #dc2626 !important;
+}
+#accessify-host.acc-screen-reader img:not([alt])::after,
+#accessify-host.acc-screen-reader img[alt=""]::after {
+  content: '⚠ missing alt';
+  color: #dc2626;
+}
+#accessify-host.acc-screen-reader button,
+#accessify-host.acc-screen-reader a,
+#accessify-host.acc-screen-reader [role="button"] {
+  min-height: 32px;
+  min-width: 32px;
+}
+
 .acc-magnify-cursor {
   position: fixed;
   pointer-events: none;
