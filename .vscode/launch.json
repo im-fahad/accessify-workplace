@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Dev: Next.js",
+      "name": "Dev: Local Playground (workspace pkg)",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
@@ -12,61 +12,31 @@
       "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "Dev: Nuxt",
+      "name": "Dev: Live Playground (npm pkg)",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
-      "cwd": "${workspaceFolder}/playground/nuxt",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/playground/vercel",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "Dev: React",
+      "name": "Build: @glitchlab/accessify (watch)",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
-      "cwd": "${workspaceFolder}/playground/react",
+      "runtimeArgs": ["--filter", "@glitchlab/accessify", "dev"],
+      "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
     },
     {
-      "name": "Dev: Svelte",
+      "name": "Test: @glitchlab/accessify (watch)",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
-      "cwd": "${workspaceFolder}/playground/svelte",
-      "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"]
-    },
-    {
-      "name": "Dev: Vanilla",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
-      "cwd": "${workspaceFolder}/playground/vanilla",
-      "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"]
-    },
-    {
-      "name": "Dev: Vue",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
-      "cwd": "${workspaceFolder}/playground/vue",
-      "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"]
-    },
-    {
-      "name": "Dev: All (turbo)",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
+      "runtimeArgs": ["--filter", "@glitchlab/accessify", "test:watch"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**"]
@@ -74,14 +44,10 @@
   ],
   "compounds": [
     {
-      "name": "Dev: All Playgrounds",
+      "name": "Dev: Local + Package Watch",
       "configurations": [
-        "Dev: Next.js",
-        "Dev: Nuxt",
-        "Dev: React",
-        "Dev: Svelte",
-        "Dev: Vanilla",
-        "Dev: Vue"
+        "Build: @glitchlab/accessify (watch)",
+        "Dev: Local Playground (workspace pkg)"
       ],
       "stopAll": true
     }
