@@ -1,16 +1,16 @@
 {
-  "name": "playground-local",
+  "name": "accessify-playground",
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next"
   },
   "dependencies": {
-    "@glitchlab/accessify": "workspace:*",
+    "@glitchlab/accessify": "^0.2.1",
     "next": "^14.2.0",
     "react": "^18.3.0",
     "react-dom": "^18.3.0"

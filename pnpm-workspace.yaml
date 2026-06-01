@@ -1,3 +1,6 @@
 packages:
   - 'packages/*'
-  - 'playground/*'
+  - 'playground/nextjs'
+  # playground/vercel is intentionally excluded — it installs @glitchlab/accessify
+  # from npm (not workspace) so it mirrors the published package exactly.
+  # Install it standalone with: cd playground/vercel && npm install
