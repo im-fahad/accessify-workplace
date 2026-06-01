@@ -10,7 +10,7 @@ Works as a plain JavaScript class or with first-class bindings for **React**, **
 
 **[🔗 Live Demo →](https://accessify-playground.vercel.app/)**
 
-![Accessify widget demo](https://accessify-playground.vercel.app/demo.gif)
+![Accessify widget demo](https://raw.githubusercontent.com/im-fahad/accessify/master/assets/demo.gif)
 
 ---
 
