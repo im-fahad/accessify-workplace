@@ -245,10 +245,11 @@ widget.getState() // → { textMagnifier: false, ... }
 
 A circular zoom lens (260 px diameter) that follows the cursor and shows a live **2.75× zoom** of whatever is underneath it. Best for scanning pages with mixed content (charts, images, paragraphs) at higher magnification than a tooltip can express.
 
-- Cursor-tracking with `mousemove`
-- Live snapshot of the page content refreshed every 800 ms (so state changes like form inputs stay in sync)
-- Hides itself when the cursor enters the widget UI to avoid recursion
-- 1× — 2.75× of every pixel in `#accessify-host` (effects like contrast/font-size also magnify, so the user sees the *applied* state at zoom)
+- **Smooth motion** — `requestAnimationFrame` loop with eased interpolation, `translate3d` on both lens shell and inner clone so the compositor drives the animation on its own layer (60 fps, no layout per frame)
+- **Live content sync** — a `MutationObserver` on `#accessify-host` re-snapshots ~150 ms after any DOM change (debounced so a burst of mutations from a framework re-render becomes one redraw). A 400 ms safety poll catches things observers don't fire on (video frames, CSS transitions).
+- **Form state mirrored** — `<input>`, `<textarea>`, and `<select>` values are copied onto the clone so typed text and selected options appear inside the lens (cloneNode normally only copies the initial attribute, not the live IDL value).
+- **Hides over the widget** — the lens disappears when the cursor enters the widget UI to avoid recursion.
+- **Magnifies the applied state** — page-level effects like contrast and font size also magnify, so the user sees the post-adjustment view at zoom.
 
 ### When to use which
 

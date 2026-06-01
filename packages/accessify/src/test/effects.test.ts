@@ -183,6 +183,39 @@ describe('applyEffects', () => {
     applyEffects(state)
     expect(document.getElementById(HOST_WRAPPER_ID)?.classList.contains('acc-reading-lens')).toBe(false)
   })
+
+  it('reading lens mirrors live input values into the clone', () => {
+    const wrapper = document.getElementById(HOST_WRAPPER_ID)!
+    const input = document.createElement('input')
+    input.type = 'text'
+    input.defaultValue = ''      // attribute is empty
+    wrapper.appendChild(input)
+    input.value = 'typed text'   // IDL value differs from attribute
+
+    const state = freshState()
+    state.readingLens = true
+    applyEffects(state)
+
+    const lensInput = document.querySelector<HTMLInputElement>('.acc-reading-lens-inner input')
+    expect(lensInput).not.toBeNull()
+    expect(lensInput!.value).toBe('typed text')
+  })
+
+  it('reading lens mirrors live <select> selected index into the clone', () => {
+    const wrapper = document.getElementById(HOST_WRAPPER_ID)!
+    const select = document.createElement('select')
+    select.innerHTML = '<option>a</option><option>b</option><option>c</option>'
+    wrapper.appendChild(select)
+    select.selectedIndex = 2
+
+    const state = freshState()
+    state.readingLens = true
+    applyEffects(state)
+
+    const lensSelect = document.querySelector<HTMLSelectElement>('.acc-reading-lens-inner select')
+    expect(lensSelect).not.toBeNull()
+    expect(lensSelect!.selectedIndex).toBe(2)
+  })
 })
 
 describe('clearEffects', () => {

@@ -149,10 +149,19 @@ let lensTargetY = 0
 let lensCurX = 0
 let lensCurY = 0
 let lensVisible = false
+let lensObserver: MutationObserver | null = null
+let lensSnapshotDebounce: number | null = null
 // Easing factor — 1 = instant snap, smaller = smoother. 0.35 keeps the
 // lens responsive (no obvious lag) while smoothing out mousemove jitter
 // and aligning writes to the compositor frame.
 const LENS_EASE = 0.35
+// Wait this long after the *last* mutation before snapshotting, so a
+// burst of DOM changes (e.g. a React re-render touching many nodes)
+// produces a single re-snapshot instead of dozens.
+const LENS_DEBOUNCE_MS = 150
+// Safety polling interval — catches things MutationObserver doesn't
+// fire on (video frame advances, CSS transitions, scrollTop changes).
+const LENS_POLL_MS = 400
 
 function snapshotHostIntoLens(): void {
   if (!lensInner) return
@@ -169,7 +178,37 @@ function snapshotHostIntoLens(): void {
   clone.style.pointerEvents = 'none'
   // Strip interactive cloned widgets that would re-mount/clash
   clone.querySelectorAll('.accessify-root, .acc-reading-lens, script, iframe').forEach(n => n.remove())
+  // Mirror live input/textarea values onto the clone (cloneNode doesn't
+  // copy the IDL value property, only the initial defaultValue attribute).
+  const liveInputs = host.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea')
+  const cloneInputs = clone.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input, textarea')
+  for (let i = 0; i < liveInputs.length && i < cloneInputs.length; i++) {
+    const live = liveInputs[i]
+    const dup = cloneInputs[i]
+    if (live instanceof HTMLInputElement && dup instanceof HTMLInputElement) {
+      dup.value = live.value
+      if (live.type === 'checkbox' || live.type === 'radio') dup.checked = live.checked
+    } else if (live instanceof HTMLTextAreaElement && dup instanceof HTMLTextAreaElement) {
+      dup.value = live.value
+    }
+  }
+  // Same for <select> — cloneNode doesn't preserve the selected option's
+  // runtime state.
+  const liveSelects = host.querySelectorAll<HTMLSelectElement>('select')
+  const cloneSelects = clone.querySelectorAll<HTMLSelectElement>('select')
+  for (let i = 0; i < liveSelects.length && i < cloneSelects.length; i++) {
+    cloneSelects[i].selectedIndex = liveSelects[i].selectedIndex
+  }
   lensInner.appendChild(clone)
+}
+
+function scheduleLensSnapshot(): void {
+  if (!lensVisible) return
+  if (lensSnapshotDebounce !== null) clearTimeout(lensSnapshotDebounce)
+  lensSnapshotDebounce = globalThis.setTimeout(() => {
+    lensSnapshotDebounce = null
+    snapshotHostIntoLens()
+  }, LENS_DEBOUNCE_MS)
 }
 
 function lensFrame(): void {
@@ -231,13 +270,33 @@ function enableReadingLens(): void {
       lensCurX = e.clientX
       lensCurY = e.clientY
       lensVisible = true
+      // Lens just became visible; re-snapshot now in case anything
+      // changed while it was hidden over the widget UI.
+      snapshotHostIntoLens()
     }
     lensTargetX = e.clientX
     lensTargetY = e.clientY
     lensRafId ??= requestAnimationFrame(lensFrame)
   }
   document.addEventListener('mousemove', lensMoveHandler, { passive: true })
-  lensRefreshTimer = globalThis.setInterval(snapshotHostIntoLens, 800)
+
+  // Live re-snapshot on host DOM changes — debounced so a burst of
+  // mutations (typical for framework re-renders) only triggers one redraw.
+  const host = document.getElementById(HOST_WRAPPER_ID)
+  if (host && typeof MutationObserver !== 'undefined') {
+    lensObserver = new MutationObserver(scheduleLensSnapshot)
+    lensObserver.observe(host, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true,
+    })
+  }
+  // Safety net: poll for things MutationObserver can't see (video frame
+  // advances, CSS transitions, live input/select values, scrollTop drift).
+  lensRefreshTimer = globalThis.setInterval(() => {
+    if (lensVisible) snapshotHostIntoLens()
+  }, LENS_POLL_MS)
 }
 
 function disableReadingLens(): void {
@@ -252,6 +311,14 @@ function disableReadingLens(): void {
   if (lensRafId !== null) {
     cancelAnimationFrame(lensRafId)
     lensRafId = null
+  }
+  if (lensSnapshotDebounce !== null) {
+    clearTimeout(lensSnapshotDebounce)
+    lensSnapshotDebounce = null
+  }
+  if (lensObserver) {
+    lensObserver.disconnect()
+    lensObserver = null
   }
   lensVisible = false
   if (lensEl) {
