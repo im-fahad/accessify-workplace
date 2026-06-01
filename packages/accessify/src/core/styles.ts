@@ -602,6 +602,34 @@ div.accessify-tile { cursor: default; }
   color: #0c0c0c;
 }
 
+/* ── Reading lens (circular zoom that follows the cursor) ── */
+.acc-reading-lens {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2147483645;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #fff;
+  border: 4px solid #0c0c0c;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.5),
+    0 12px 32px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.4);
+}
+.acc-reading-lens-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  transform-origin: 0 0;
+}
+.acc-reading-lens-inner > * {
+  margin: 0 !important;
+}
+
 .accessify-root :focus-visible {
   outline: 2px solid var(--acc-primary);
   outline-offset: 2px;

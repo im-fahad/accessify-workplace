@@ -20,6 +20,7 @@ describe('DEFAULT_STATE', () => {
   it('has all boolean flags false', () => {
     const boolKeys = [
       'readableFont', 'highlightTitles', 'highlightLinks', 'textMagnifier',
+      'readingLens',
       'darkContrast', 'lightContrast', 'highContrast', 'colorBlind',
       'monochrome', 'invertColors',
     ] as const

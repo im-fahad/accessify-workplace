@@ -24,6 +24,7 @@ export interface Translations {
   highlightTitles: string
   fontSize: string
   textMagnifier: string
+  readingLens: string
   highlightLinks: string
   lineHeight: string
   letterSpacing: string
@@ -76,6 +77,7 @@ const en: Translations = {
   highlightTitles: 'Highlight Titles',
   fontSize: 'Font Size',
   textMagnifier: 'Text Magnifier',
+  readingLens: 'Reading Lens',
   highlightLinks: 'Highlight Links',
   lineHeight: 'Line Height',
   letterSpacing: 'Letter Spacing',
@@ -124,6 +126,7 @@ const es: Translations = {
   highlightTitles: 'Resaltar Títulos',
   fontSize: 'Tamaño de Fuente',
   textMagnifier: 'Lupa de Texto',
+  readingLens: 'Lente de Lectura',
   highlightLinks: 'Resaltar Enlaces',
   lineHeight: 'Altura de Línea',
   letterSpacing: 'Espaciado de Letras',
@@ -172,6 +175,7 @@ const fr: Translations = {
   highlightTitles: 'Surligner les Titres',
   fontSize: 'Taille de Police',
   textMagnifier: 'Loupe de Texte',
+  readingLens: 'Loupe de Lecture',
   highlightLinks: 'Surligner les Liens',
   lineHeight: 'Hauteur de Ligne',
   letterSpacing: 'Espacement des Lettres',
@@ -220,6 +224,7 @@ const de: Translations = {
   highlightTitles: 'Überschriften hervorheben',
   fontSize: 'Schriftgröße',
   textMagnifier: 'Textlupe',
+  readingLens: 'Leselupe',
   highlightLinks: 'Links hervorheben',
   lineHeight: 'Zeilenhöhe',
   letterSpacing: 'Zeichenabstand',
@@ -268,6 +273,7 @@ const pt: Translations = {
   highlightTitles: 'Destacar Títulos',
   fontSize: 'Tamanho da Fonte',
   textMagnifier: 'Lupa de Texto',
+  readingLens: 'Lupa de Leitura',
   highlightLinks: 'Destacar Links',
   lineHeight: 'Altura da Linha',
   letterSpacing: 'Espaçamento de Letras',
@@ -316,6 +322,7 @@ const ar: Translations = {
   highlightTitles: 'تمييز العناوين',
   fontSize: 'حجم الخط',
   textMagnifier: 'مكبر النص',
+  readingLens: 'عدسة القراءة',
   highlightLinks: 'تمييز الروابط',
   lineHeight: 'ارتفاع السطر',
   letterSpacing: 'تباعد الحروف',

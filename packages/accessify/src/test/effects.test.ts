@@ -159,6 +159,30 @@ describe('applyEffects', () => {
     unwrapHost()
     expect(() => applyEffects(freshState())).not.toThrow()
   })
+
+  it('mounts reading lens element when readingLens is true', () => {
+    const state = freshState()
+    state.readingLens = true
+    applyEffects(state)
+    expect(document.querySelector('.acc-reading-lens')).not.toBeNull()
+    expect(document.querySelector('.acc-reading-lens-inner')).not.toBeNull()
+  })
+
+  it('removes reading lens element when readingLens turns off', () => {
+    const state = freshState()
+    state.readingLens = true
+    applyEffects(state)
+    state.readingLens = false
+    applyEffects(state)
+    expect(document.querySelector('.acc-reading-lens')).toBeNull()
+  })
+
+  it('adds acc-reading-lens class to wrapper when readingLens is true', () => {
+    const state = freshState()
+    state.readingLens = true
+    applyEffects(state)
+    expect(document.getElementById(HOST_WRAPPER_ID)?.classList.contains('acc-reading-lens')).toBe(true)
+  })
 })
 
 describe('clearEffects', () => {

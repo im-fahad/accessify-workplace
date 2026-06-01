@@ -135,6 +135,85 @@ function disableMagnifier(): void {
   }
 }
 
+const LENS_ID = 'accessify-reading-lens'
+const LENS_DIAMETER = 220
+const LENS_ZOOM = 2
+
+let lensEl: HTMLDivElement | null = null
+let lensInner: HTMLDivElement | null = null
+let lensMoveHandler: ((e: MouseEvent) => void) | null = null
+let lensRefreshTimer: number | null = null
+
+function snapshotHostIntoLens(): void {
+  if (!lensInner) return
+  const host = document.getElementById(HOST_WRAPPER_ID)
+  if (!host) return
+  const rect = host.getBoundingClientRect()
+  lensInner.innerHTML = ''
+  const clone = host.cloneNode(true) as HTMLElement
+  clone.id = ''
+  clone.style.position = 'absolute'
+  clone.style.top = `${rect.top}px`
+  clone.style.left = `${rect.left}px`
+  clone.style.width = `${rect.width}px`
+  clone.style.pointerEvents = 'none'
+  // Strip interactive cloned widgets that would re-mount/clash
+  clone.querySelectorAll('.accessify-root, script, iframe').forEach(n => n.remove())
+  lensInner.appendChild(clone)
+}
+
+function enableReadingLens(): void {
+  if (lensEl) return
+  lensEl = document.createElement('div')
+  lensEl.className = 'acc-reading-lens'
+  lensEl.setAttribute('aria-hidden', 'true')
+  lensEl.style.display = 'none'
+
+  lensInner = document.createElement('div')
+  lensInner.className = 'acc-reading-lens-inner'
+  lensInner.style.transform = `scale(${LENS_ZOOM})`
+  lensEl.appendChild(lensInner)
+
+  document.body.appendChild(lensEl)
+  snapshotHostIntoLens()
+
+  lensMoveHandler = (e: MouseEvent) => {
+    if (!lensEl || !lensInner) return
+    const target = e.target as Element | null
+    if (target?.closest('.accessify-root')) {
+      lensEl.style.display = 'none'
+      return
+    }
+    lensEl.style.display = 'block'
+    const half = LENS_DIAMETER / 2
+    lensEl.style.left = `${e.clientX - half}px`
+    lensEl.style.top = `${e.clientY - half}px`
+    // Translate the scaled clone so the cursor point ends up at lens center.
+    // After scale(Z) around top-left, point (x,y) → (x*Z, y*Z); we want it at (half, half).
+    const tx = half - e.clientX * LENS_ZOOM
+    const ty = half - e.clientY * LENS_ZOOM
+    lensInner.style.transform = `translate(${tx}px, ${ty}px) scale(${LENS_ZOOM})`
+  }
+  document.addEventListener('mousemove', lensMoveHandler)
+  lensRefreshTimer = globalThis.setInterval(snapshotHostIntoLens, 800)
+}
+
+function disableReadingLens(): void {
+  if (lensMoveHandler) {
+    document.removeEventListener('mousemove', lensMoveHandler)
+    lensMoveHandler = null
+  }
+  if (lensRefreshTimer !== null) {
+    clearInterval(lensRefreshTimer)
+    lensRefreshTimer = null
+  }
+  if (lensEl) {
+    lensEl.remove()
+    lensEl = null
+    lensInner = null
+  }
+}
+
 export function applyEffects(state: AccessifyState): void {
   if (typeof document === 'undefined') return
   const wrapper = document.getElementById(HOST_WRAPPER_ID)
@@ -152,6 +231,7 @@ export function applyEffects(state: AccessifyState): void {
     ['acc-invert', state.invertColors],
     ['acc-color-blind', state.colorBlind],
     ['acc-text-magnifier', state.textMagnifier],
+    ['acc-reading-lens', state.readingLens],
     ['acc-keyboard-nav', state.profile === 'keyboard-navigation'],
     ['acc-screen-reader', state.profile === 'screen-reader'],
   ]
@@ -162,6 +242,8 @@ export function applyEffects(state: AccessifyState): void {
   ensureHostStyle().textContent = dynamicCss(state)
   if (state.textMagnifier) enableMagnifier()
   else disableMagnifier()
+  if (state.readingLens) enableReadingLens()
+  else disableReadingLens()
 }
 
 export function clearEffects(): void {
@@ -176,4 +258,5 @@ export function clearEffects(): void {
   if (host) host.textContent = ''
   document.getElementById(COLOR_BLIND_FILTER_ID)?.remove()
   disableMagnifier()
+  disableReadingLens()
 }

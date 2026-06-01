@@ -42,6 +42,7 @@ export interface AccessifyState {
   highlightTitles: boolean
   highlightLinks: boolean
   textMagnifier: boolean
+  readingLens: boolean
   darkContrast: boolean
   lightContrast: boolean
   highContrast: boolean
@@ -61,6 +62,7 @@ export const DEFAULT_STATE: AccessifyState = {
   highlightTitles: false,
   highlightLinks: false,
   textMagnifier: false,
+  readingLens: false,
   darkContrast: false,
   lightContrast: false,
   highContrast: false,

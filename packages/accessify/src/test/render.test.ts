@@ -93,6 +93,7 @@ describe('renderPanel', () => {
     expect(html).toContain('data-toggle="highlightTitles"')
     expect(html).toContain('data-toggle="highlightLinks"')
     expect(html).toContain('data-toggle="textMagnifier"')
+    expect(html).toContain('data-toggle="readingLens"')
   })
 
   it('marks active toggle tile as aria-pressed=true', () => {

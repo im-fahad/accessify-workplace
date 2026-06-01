@@ -201,6 +201,7 @@ export function renderPanel(
           ${stepperTile({ key: 'fontSize',       icon: ICONS.fontSizing,      label: t.fontSize,       value: state.fontSize,      min: -5, max: 10, defaultLabel: t.default })}
           ${toggleTile({  key: 'textMagnifier',  icon: ICONS.textMagnifier,   label: t.textMagnifier,  active: state.textMagnifier })}
           ${toggleTile({  key: 'highlightLinks', icon: ICONS.highlightLinks,  label: t.highlightLinks, active: state.highlightLinks })}
+          ${toggleTile({  key: 'readingLens',    icon: ICONS.readingLens,     label: t.readingLens,    active: state.readingLens })}
           ${stepperTile({ key: 'lineHeight',     icon: ICONS.lineHeight,      label: t.lineHeight,     value: state.lineHeight,    min: -2, max: 6,  defaultLabel: t.default })}
           ${stepperTile({ key: 'letterSpacing',  icon: ICONS.letterSpacing,   label: t.letterSpacing,  value: state.letterSpacing, min: -2, max: 6,  defaultLabel: t.default })}
           ${alignmentTile(state.textAlignment, t.textAlign, t.alignLeft, t.alignCenter, t.alignRight)}
