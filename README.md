@@ -1,89 +1,115 @@
-# Accessify Monorepo
+# Accessify — Monorepo
 
-A universal accessibility widget for the web, built with framework-specific bindings for React, Vue, and Svelte.
+Source for [`@glitchlab/accessify`](https://www.npmjs.com/package/@glitchlab/accessify) — a lightweight, framework-agnostic accessibility widget for the web with first-class React, Vue 3, and Svelte bindings.
 
-## Structure
+🔗 **Live demo:** https://accessify-playground.vercel.app
+📦 **Package README:** [`packages/accessify/README.md`](./packages/accessify/README.md) — full API docs, all examples, every config option
+
+---
+
+## Repo structure
 
 ```
 accessify/
 ├── packages/
-│   └── accessify/          # @glitchlab/accessify — universal npm package
-└── playground/
-    ├── vanilla/            # Vite + vanilla TS
-    ├── react/              # Vite + React + TypeScript
-    ├── nextjs/             # Next.js 14 App Router
-    ├── vue/                # Vite + Vue 3 + TypeScript
-    ├── nuxt/               # Nuxt 3
-    └── svelte/             # SvelteKit
+│   └── accessify/         # @glitchlab/accessify — the published package
+├── playground/
+│   ├── nextjs/            # Local playground — uses workspace:* (test unpublished changes)
+│   └── vercel/            # Live demo source — uses npm dep, mirrored to a public repo
+├── scripts/
+│   ├── push-package.sh    # Syncs packages/accessify → im-fahad/accessify (public source repo)
+│   └── sync-playground.sh # Syncs playground/vercel → im-fahad/accessify-playground (Vercel deploys)
+└── .vscode/
+    └── launch.json        # Debug configs for both playgrounds + package watcher
 ```
 
-## Quick Start
+---
+
+## Why two playgrounds?
+
+| | `playground/nextjs` | `playground/vercel` |
+|---|---|---|
+| Purpose | Test unpublished changes | Public live demo |
+| Package source | `workspace:*` (symlinked) | `^0.2.2` from npm |
+| In pnpm workspace? | Yes | No (excluded) |
+| Install | `pnpm install` (root) | `cd playground/vercel && npm install` |
+| Dev port | 3000 | 3001 |
+
+When you edit the package, `playground/nextjs` picks up the next `pnpm --filter @glitchlab/accessify build`. `playground/vercel` only sees what's published to npm — exactly what end users get.
+
+---
+
+## Setup
 
 ```bash
 pnpm install
-pnpm dev         # runs all playgrounds
 ```
 
-## Per-Playground Dev Commands
+This installs root deps, the package, and the local playground. The vercel playground installs separately:
 
 ```bash
-pnpm --filter playground-vanilla dev
-pnpm --filter playground-react dev
-pnpm --filter playground-nextjs dev
-pnpm --filter playground-vue dev
-pnpm --filter playground-nuxt dev
-pnpm --filter playground-svelte dev
+cd playground/vercel && npm install
 ```
 
-## Build
+---
+
+## Daily workflow
+
+**Editing the package:**
 
 ```bash
-pnpm build
+# Terminal 1 — package watch build
+pnpm --filter @glitchlab/accessify dev
+
+# Terminal 2 — local playground
+cd playground/nextjs && pnpm dev   # http://localhost:3000
 ```
 
-## Usage
+VSCode shortcut: run the **Dev: Local + Package Watch** compound launch config.
 
-### Vanilla JS/TS
+**Testing:**
 
-```ts
-import { Accessify } from '@glitchlab/accessify'
-
-const widget = new Accessify({ position: 'bottom-right', size: 'M' })
-widget.mount()
+```bash
+pnpm --filter @glitchlab/accessify test          # one-shot
+pnpm --filter @glitchlab/accessify test:watch    # watch mode
+pnpm --filter @glitchlab/accessify test:coverage # with v8 coverage
 ```
 
-### React
+**Checking the live playground locally** (e.g. before publishing):
 
-```tsx
-import { AccessifyWidget, useAccessify } from '@glitchlab/accessify/react'
-
-function App() {
-  const { open, close, toggle, reset, state } = useAccessify()
-  return <AccessifyWidget position="bottom-right" />
-}
+```bash
+cd playground/vercel && npm run dev   # http://localhost:3001
 ```
 
-### Vue
+---
 
-```ts
-import { createApp } from 'vue'
-import { AccessifyPlugin } from '@glitchlab/accessify/vue'
+## Release flow
 
-const app = createApp(App)
-app.use(AccessifyPlugin, { position: 'bottom-right' })
-```
+After local testing in `playground/nextjs/` looks good:
 
-### Svelte
+1. **Bump version** in `packages/accessify/package.json`
+2. **Build** — `pnpm --filter @glitchlab/accessify build`
+3. **Publish** — `cd packages/accessify && npm publish --access public`
+4. **Sync source repo** — `bash scripts/push-package.sh "release: vX.Y.Z"`
+   (force-pushes `packages/accessify/` content to `im-fahad/accessify`)
+5. **Sync live playground** — `bash scripts/sync-playground.sh "sync: vX.Y.Z"`
+   (bumps `playground/vercel/package.json` to the new version, force-pushes to `im-fahad/accessify-playground`, Vercel auto-redeploys)
+6. **Commit + push** the monorepo to record the version bump
 
-```svelte
-<script>
-  import { accessifyStore } from '@glitchlab/accessify/svelte'
-  accessifyStore.mount()
-</script>
+Steps 4–5 use force-push because the standalone repos are pure mirrors of `packages/accessify/` and `playground/vercel/` respectively — they have no independent history.
 
-<button on:click={() => accessifyStore.toggle()}>Toggle</button>
-```
+---
+
+## Remotes
+
+| Repo | What it is |
+|---|---|
+| [im-fahad/accessify-workplace](https://github.com/im-fahad/accessify-workplace) | This monorepo (`origin/master`) |
+| [im-fahad/accessify](https://github.com/im-fahad/accessify) | Public source repo for the npm package — mirror of `packages/accessify/` |
+| [im-fahad/accessify-playground](https://github.com/im-fahad/accessify-playground) | Vercel deployment repo — mirror of `playground/vercel/` |
+
+---
 
 ## License
 
-MIT
+MIT © [GlitchLab](https://github.com/im-fahad)
