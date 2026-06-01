@@ -605,6 +605,8 @@ div.accessify-tile { cursor: default; }
 /* ── Reading lens (circular zoom that follows the cursor) ── */
 .acc-reading-lens {
   position: fixed;
+  top: 0;
+  left: 0;
   pointer-events: none;
   z-index: 2147483645;
   width: 260px;
@@ -617,7 +619,10 @@ div.accessify-tile { cursor: default; }
     0 0 0 1px rgba(255,255,255,0.6),
     0 16px 40px rgba(0,0,0,0.40),
     inset 0 0 0 1px rgba(255,255,255,0.4);
+  will-change: transform;
+  contain: layout paint;
 }
+.acc-reading-lens-inner { will-change: transform; }
 .acc-reading-lens::after {
   content: '';
   position: absolute;

@@ -137,11 +137,22 @@ function disableMagnifier(): void {
 
 const LENS_DIAMETER = 260
 const LENS_ZOOM = 2.75
+const LENS_HALF = LENS_DIAMETER / 2
 
 let lensEl: HTMLDivElement | null = null
 let lensInner: HTMLDivElement | null = null
 let lensMoveHandler: ((e: MouseEvent) => void) | null = null
 let lensRefreshTimer: number | null = null
+let lensRafId: number | null = null
+let lensTargetX = 0
+let lensTargetY = 0
+let lensCurX = 0
+let lensCurY = 0
+let lensVisible = false
+// Easing factor — 1 = instant snap, smaller = smoother. 0.35 keeps the
+// lens responsive (no obvious lag) while smoothing out mousemove jitter
+// and aligning writes to the compositor frame.
+const LENS_EASE = 0.35
 
 function snapshotHostIntoLens(): void {
   if (!lensInner) return
@@ -161,39 +172,71 @@ function snapshotHostIntoLens(): void {
   lensInner.appendChild(clone)
 }
 
+function lensFrame(): void {
+  lensRafId = null
+  if (!lensEl || !lensInner) return
+  // Ease toward the target each frame. Snap when close enough to avoid
+  // sub-pixel jitter that the compositor would otherwise have to paint.
+  const dx = lensTargetX - lensCurX
+  const dy = lensTargetY - lensCurY
+  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+    lensCurX = lensTargetX
+    lensCurY = lensTargetY
+  } else {
+    lensCurX += dx * LENS_EASE
+    lensCurY += dy * LENS_EASE
+    lensRafId = requestAnimationFrame(lensFrame)
+  }
+  // Single transform on the lens shell (GPU-composited) and another on
+  // the inner clone. Both use translate3d so the browser puts them on
+  // their own layer and skips layout entirely on each frame.
+  lensEl.style.transform = `translate3d(${lensCurX - LENS_HALF}px, ${lensCurY - LENS_HALF}px, 0)`
+  const tx = LENS_HALF - lensCurX * LENS_ZOOM
+  const ty = LENS_HALF - lensCurY * LENS_ZOOM
+  lensInner.style.transform = `translate3d(${tx}px, ${ty}px, 0) scale(${LENS_ZOOM})`
+}
+
 function enableReadingLens(): void {
   if (lensEl) return
   lensEl = document.createElement('div')
   lensEl.className = 'acc-reading-lens'
   lensEl.setAttribute('aria-hidden', 'true')
   lensEl.style.display = 'none'
+  lensEl.style.left = '0'
+  lensEl.style.top = '0'
+  lensEl.style.willChange = 'transform'
 
   lensInner = document.createElement('div')
   lensInner.className = 'acc-reading-lens-inner'
   lensInner.style.transform = `scale(${LENS_ZOOM})`
+  lensInner.style.willChange = 'transform'
   lensEl.appendChild(lensInner)
 
   document.body.appendChild(lensEl)
   snapshotHostIntoLens()
 
   lensMoveHandler = (e: MouseEvent) => {
-    if (!lensEl || !lensInner) return
+    if (!lensEl) return
     const target = e.target as Element | null
     if (target?.closest('.accessify-root')) {
-      lensEl.style.display = 'none'
+      if (lensVisible) {
+        lensEl.style.display = 'none'
+        lensVisible = false
+      }
       return
     }
-    lensEl.style.display = 'block'
-    const half = LENS_DIAMETER / 2
-    lensEl.style.left = `${e.clientX - half}px`
-    lensEl.style.top = `${e.clientY - half}px`
-    // Translate the scaled clone so the cursor point ends up at lens center.
-    // After scale(Z) around top-left, point (x,y) → (x*Z, y*Z); we want it at (half, half).
-    const tx = half - e.clientX * LENS_ZOOM
-    const ty = half - e.clientY * LENS_ZOOM
-    lensInner.style.transform = `translate(${tx}px, ${ty}px) scale(${LENS_ZOOM})`
+    if (!lensVisible) {
+      lensEl.style.display = 'block'
+      // Skip the ease for the first show — snap to cursor instantly.
+      lensCurX = e.clientX
+      lensCurY = e.clientY
+      lensVisible = true
+    }
+    lensTargetX = e.clientX
+    lensTargetY = e.clientY
+    lensRafId ??= requestAnimationFrame(lensFrame)
   }
-  document.addEventListener('mousemove', lensMoveHandler)
+  document.addEventListener('mousemove', lensMoveHandler, { passive: true })
   lensRefreshTimer = globalThis.setInterval(snapshotHostIntoLens, 800)
 }
 
@@ -206,6 +249,11 @@ function disableReadingLens(): void {
     clearInterval(lensRefreshTimer)
     lensRefreshTimer = null
   }
+  if (lensRafId !== null) {
+    cancelAnimationFrame(lensRafId)
+    lensRafId = null
+  }
+  lensVisible = false
   if (lensEl) {
     lensEl.remove()
     lensEl = null
