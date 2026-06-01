@@ -17,7 +17,7 @@ Works as a plain JavaScript class or with first-class bindings for **React**, **
 ## Features
 
 - **8 accessibility profiles** — Seizure Safe, Vision Impaired, ADHD Friendly, Cognitive Disability, Keyboard Navigation, Screen Reader, Color Blind, Dyslexia
-- **Content adjustments** — font size, content scale, line height, letter spacing, text alignment, readable font, text magnifier, title/link highlighting
+- **Content adjustments** — font size, content scale, line height, letter spacing, text alignment, readable font, text magnifier, reading lens, title/link highlighting
 - **Color adjustments** — dark contrast, light contrast, high contrast, monochrome, invert colors, color blind (protanopia filter)
 - **Dark mode** — light by default, opt in with `colorScheme: 'dark'`
 - **Keyboard navigation** — full focus trap in panel, Escape to close, skip-to-main link injection
@@ -227,6 +227,39 @@ The **Screen Reader** profile reinforces page structure for users relying on ass
 
 ---
 
+## Reading Tools
+
+Two complementary toggles help users with low vision or reading difficulty read what's on screen. Both live under **Content Adjustments** in the widget panel.
+
+### Text Magnifier
+
+A tooltip-style helper. Hover any element on the page and a high-contrast box shows the element's text content at ~20px, regardless of the source font size. Best for inspecting small body text, fine print, or buttons with tiny labels.
+
+```ts
+new Accessify({ /* ... */ })  // user enables it from the panel
+// or programmatically:
+widget.getState() // → { textMagnifier: false, ... }
+```
+
+### Reading Lens
+
+A circular zoom lens (260 px diameter) that follows the cursor and shows a live **2.75× zoom** of whatever is underneath it. Best for scanning pages with mixed content (charts, images, paragraphs) at higher magnification than a tooltip can express.
+
+- Cursor-tracking with `mousemove`
+- Live snapshot of the page content refreshed every 800 ms (so state changes like form inputs stay in sync)
+- Hides itself when the cursor enters the widget UI to avoid recursion
+- 1× — 2.75× of every pixel in `#accessify-host` (effects like contrast/font-size also magnify, so the user sees the *applied* state at zoom)
+
+### When to use which
+
+| Need | Use |
+|---|---|
+| Read small text labels clearly | Text Magnifier |
+| Inspect images, charts, or layout details | Reading Lens |
+| Both at once | Yes — they're independent toggles |
+
+---
+
 ## WCAG Page Scanner
 
 Click **Analyze Page** inside the widget to run a live accessibility scan. The scanner checks:
@@ -379,6 +412,7 @@ interface AccessifyState {
   highlightTitles: boolean
   highlightLinks: boolean
   textMagnifier: boolean
+  readingLens: boolean
 
   // Color toggles (dark/light/high/monochrome/invert are mutually exclusive)
   darkContrast: boolean
