@@ -177,11 +177,11 @@ describe('applyEffects', () => {
     expect(document.querySelector('.acc-reading-lens')).toBeNull()
   })
 
-  it('adds acc-reading-lens class to wrapper when readingLens is true', () => {
+  it('does NOT add acc-reading-lens class to wrapper (avoids style collision with the lens element)', () => {
     const state = freshState()
     state.readingLens = true
     applyEffects(state)
-    expect(document.getElementById(HOST_WRAPPER_ID)?.classList.contains('acc-reading-lens')).toBe(true)
+    expect(document.getElementById(HOST_WRAPPER_ID)?.classList.contains('acc-reading-lens')).toBe(false)
   })
 })
 

@@ -607,16 +607,24 @@ div.accessify-tile { cursor: default; }
   position: fixed;
   pointer-events: none;
   z-index: 2147483645;
-  width: 220px;
-  height: 220px;
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
   overflow: hidden;
   background: #fff;
   border: 4px solid #0c0c0c;
   box-shadow:
-    0 0 0 1px rgba(255,255,255,0.5),
-    0 12px 32px rgba(0,0,0,0.35),
+    0 0 0 1px rgba(255,255,255,0.6),
+    0 16px 40px rgba(0,0,0,0.40),
     inset 0 0 0 1px rgba(255,255,255,0.4);
+}
+.acc-reading-lens::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: inset 0 0 24px rgba(0,0,0,0.10);
 }
 .acc-reading-lens-inner {
   position: absolute;

@@ -135,9 +135,8 @@ function disableMagnifier(): void {
   }
 }
 
-const LENS_ID = 'accessify-reading-lens'
-const LENS_DIAMETER = 220
-const LENS_ZOOM = 2
+const LENS_DIAMETER = 260
+const LENS_ZOOM = 2.75
 
 let lensEl: HTMLDivElement | null = null
 let lensInner: HTMLDivElement | null = null
@@ -158,7 +157,7 @@ function snapshotHostIntoLens(): void {
   clone.style.width = `${rect.width}px`
   clone.style.pointerEvents = 'none'
   // Strip interactive cloned widgets that would re-mount/clash
-  clone.querySelectorAll('.accessify-root, script, iframe').forEach(n => n.remove())
+  clone.querySelectorAll('.accessify-root, .acc-reading-lens, script, iframe').forEach(n => n.remove())
   lensInner.appendChild(clone)
 }
 
@@ -231,7 +230,6 @@ export function applyEffects(state: AccessifyState): void {
     ['acc-invert', state.invertColors],
     ['acc-color-blind', state.colorBlind],
     ['acc-text-magnifier', state.textMagnifier],
-    ['acc-reading-lens', state.readingLens],
     ['acc-keyboard-nav', state.profile === 'keyboard-navigation'],
     ['acc-screen-reader', state.profile === 'screen-reader'],
   ]

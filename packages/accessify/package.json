@@ -1,6 +1,6 @@
 {
   "name": "@glitchlab/accessify",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A lightweight, framework-agnostic accessibility widget for the web. Drop it in to give users font size, contrast, dyslexia, color blind, keyboard navigation, and screen reader controls — with zero dependencies and first-class React, Vue 3, and Svelte bindings.",
   "license": "MIT",
   "author": "GlitchLab (https://github.com/im-fahad)",
