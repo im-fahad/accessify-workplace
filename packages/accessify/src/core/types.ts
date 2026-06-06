@@ -15,6 +15,8 @@ export type AccessibilityProfile =
 export type ColorScheme = 'light' | 'dark'
 export type Lang = 'en' | 'ar' | 'es' | 'fr' | 'de' | 'pt'
 
+export type TriggerScheme = 'auto' | 'dark' | 'light'
+
 export interface AccessifyConfig {
   position?: Position
   size?: WidgetSize
@@ -24,6 +26,13 @@ export interface AccessifyConfig {
     text?: string
   }
   colorScheme?: ColorScheme
+  /**
+   * Trigger button color preset.
+   * - 'auto'  — matches colorScheme (default)
+   * - 'dark'  — black background, white icon
+   * - 'light' — white background, dark icon
+   */
+  triggerScheme?: TriggerScheme
   persistence?: boolean
   lang?: Lang
   onOpen?: () => void

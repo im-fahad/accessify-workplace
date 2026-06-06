@@ -12,6 +12,7 @@ import {
   type ColorScheme,
   type Lang,
   type TextAlignment,
+  type TriggerScheme,
   type WidgetSize,
 } from './types'
 import { runWcagScan, type WcagResult } from './wcag'
@@ -24,6 +25,7 @@ export type {
   Lang,
   Position,
   TextAlignment,
+  TriggerScheme,
   WidgetSize,
 } from './types'
 
@@ -194,6 +196,9 @@ export class Accessify {
   setColorScheme(scheme: ColorScheme): void {
     this.scheme = scheme
     this.applyScheme()
+    // If trigger is on 'auto' (matches colorScheme), refresh it too so the
+    // trigger color follows when colorScheme changes at runtime.
+    if ((this.config.triggerScheme ?? 'auto') === 'auto') this.applyTriggerScheme()
   }
 
   private applyScheme(): void {
@@ -204,10 +209,39 @@ export class Accessify {
   private applyTheme(): void {
     if (!this.root) return
     const t = this.config.theme
-    if (!t) return
-    if (t.primary) this.root.style.setProperty('--acc-primary', t.primary)
-    if (t.background) this.root.style.setProperty('--acc-bg', t.background)
-    if (t.text) this.root.style.setProperty('--acc-text', t.text)
+    if (t) {
+      if (t.primary) this.root.style.setProperty('--acc-primary', t.primary)
+      if (t.background) this.root.style.setProperty('--acc-bg', t.background)
+      if (t.text) this.root.style.setProperty('--acc-text', t.text)
+    }
+    this.applyTriggerScheme()
+  }
+
+  private applyTriggerScheme(): void {
+    if (!this.root) return
+    // Resolution chain:
+    //   1. explicit config.triggerScheme other than 'auto' wins
+    //   2. 'auto' (or unset) → match this.scheme (the resolved colorScheme,
+    //      which itself defaults to 'light' when not passed)
+    let resolved: 'dark' | 'light'
+    const wanted = this.config.triggerScheme ?? 'auto'
+    if (wanted === 'dark' || wanted === 'light') {
+      resolved = wanted
+    } else {
+      resolved = this.scheme === 'dark' ? 'dark' : 'light'
+    }
+    if (resolved === 'dark') {
+      this.root.style.setProperty('--acc-trigger-bg', '#0c0c0c')
+      this.root.style.setProperty('--acc-trigger-icon', '#ffffff')
+    } else {
+      this.root.style.setProperty('--acc-trigger-bg', '#ffffff')
+      this.root.style.setProperty('--acc-trigger-icon', '#0c0c0c')
+    }
+  }
+
+  setTriggerScheme(scheme: TriggerScheme): void {
+    this.config.triggerScheme = scheme
+    this.applyTriggerScheme()
   }
 
   private handlePanelClick(e: MouseEvent): void {

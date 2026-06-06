@@ -34,6 +34,11 @@ export function AccessifyWidget(props: AccessifyWidgetProps) {
     if (props.size) instanceRef.current.setSize(props.size)
   }, [props.size])
 
+  useEffect(() => {
+    if (!instanceRef.current) return
+    if (props.triggerScheme) instanceRef.current.setTriggerScheme(props.triggerScheme)
+  }, [props.triggerScheme])
+
   return null
 }
 

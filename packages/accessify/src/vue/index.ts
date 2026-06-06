@@ -61,6 +61,7 @@ export const AccessifyWidget = defineComponent({
     size: { type: String as PropType<WidgetSize>, default: 'M' },
     colorScheme: { type: String as PropType<ColorScheme>, default: 'light' },
     lang: { type: String as PropType<Lang>, default: 'en' },
+    triggerScheme: { type: String as PropType<AccessifyConfig['triggerScheme']>, default: undefined },
     persistence: { type: Boolean, default: true },
     theme: { type: Object as PropType<AccessifyConfig['theme']>, default: undefined },
   },
@@ -79,6 +80,7 @@ export const AccessifyWidget = defineComponent({
     watch(() => props.colorScheme, v => { if (v) instance?.setColorScheme(v) })
     watch(() => props.lang, v => { if (v) instance?.setLang(v) })
     watch(() => props.size, v => { if (v) instance?.setSize(v) })
+    watch(() => props.triggerScheme, v => { if (v) instance?.setTriggerScheme(v) })
 
     return () => null
   },

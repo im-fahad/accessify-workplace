@@ -9,6 +9,7 @@ export type WidgetConfig = {
   lang: 'en' | 'es' | 'fr' | 'de' | 'pt' | 'ar'
   persistence: boolean
   primary: string
+  triggerScheme: 'auto' | 'dark' | 'light'
 }
 
 const COLORS = [
@@ -147,14 +148,24 @@ export default function Sidebar({ config, onChange }: Props) {
                 key={c.value}
                 title={c.label}
                 className={`ctrl-color-swatch${config.primary === c.value ? ' active' : ''}`}
-                style={{
-                  background: c.value,
-                  color: c.value === '#0c0c0c' || c.value === '#7c3aed' || c.value === '#2563eb' || c.value === '#e11d48' ? '#fff' : '#fff',
-                }}
+                style={{ background: c.value, color: '#fff' }}
                 onClick={() => set('primary', c.value)}
               />
             ))}
           </div>
+        </div>
+
+        <div className="ctrl-group">
+          <span className="ctrl-label">Trigger Button</span>
+          <Segmented
+            value={config.triggerScheme}
+            options={[
+              { value: 'auto',  label: 'Auto' },
+              { value: 'dark',  label: '🌙 Dark' },
+              { value: 'light', label: '☀️ Light' },
+            ]}
+            onChange={v => set('triggerScheme', v)}
+          />
         </div>
 
         <div className="sidebar-divider" />
@@ -178,14 +189,20 @@ export default function Sidebar({ config, onChange }: Props) {
             lineHeight: 1.7,
             wordBreak: 'break-all',
           }}>
-            {'<AccessifyWidget\n'}
-            {`  position="${config.position}"\n`}
-            {`  size="${config.size}"\n`}
-            {`  colorScheme="${config.colorScheme}"\n`}
-            {`  lang="${config.lang}"\n`}
-            {config.primary !== '#0c0c0c' ? `  theme={{ primary: "${config.primary}" }}\n` : ''}
-            {!config.persistence ? `  persistence={false}\n` : ''}
-            {'/>'}
+            {(() => {
+              const lines: string[] = [
+                '<AccessifyWidget',
+                `  position="${config.position}"`,
+                `  size="${config.size}"`,
+                `  colorScheme="${config.colorScheme}"`,
+                `  lang="${config.lang}"`,
+                ...(config.triggerScheme === 'auto' ? [] : [`  triggerScheme="${config.triggerScheme}"`]),
+                ...(config.primary === '#0c0c0c' ? [] : [`  theme={{ primary: "${config.primary}" }}`]),
+                ...(config.persistence ? [] : [`  persistence={false}`]),
+                '/>',
+              ]
+              return lines.join('\n')
+            })()}
           </div>
         </div>
 

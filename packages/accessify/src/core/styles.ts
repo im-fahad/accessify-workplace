@@ -47,9 +47,9 @@ export function buildStyles(vars: StyleVars): string {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: var(--acc-primary);
-  color: #fff;
+  border: 1px solid rgba(0,0,0,0.08);
+  background: var(--acc-trigger-bg, var(--acc-primary));
+  color: var(--acc-trigger-icon, #fff);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -694,8 +694,8 @@ div.accessify-tile { cursor: default; }
   border-bottom-color: rgba(255,255,255,0.06);
 }
 .accessify-root[data-scheme="dark"] .accessify-trigger {
-  background: #fafafa;
-  color: #0c0c0c;
+  background: var(--acc-trigger-bg, #fafafa);
+  color: var(--acc-trigger-icon, #0c0c0c);
   border-color: rgba(0,0,0,0.12);
 }
 .accessify-root[data-scheme="dark"] .accessify-reset-bar { background: #0c0c0c; }

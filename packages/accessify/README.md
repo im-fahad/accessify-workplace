@@ -113,12 +113,20 @@ interface AccessifyConfig {
   /** Color scheme for the widget UI. Default: 'light' */
   colorScheme?: 'light' | 'dark'
 
+  /**
+   * Trigger button color preset.
+   * - 'auto'  — matches colorScheme (default)
+   * - 'dark'  — black background, white icon
+   * - 'light' — white background, dark icon
+   */
+  triggerScheme?: 'auto' | 'dark' | 'light'
+
   /** Panel language. Default: 'en' */
   lang?: 'en' | 'es' | 'fr' | 'de' | 'pt' | 'ar'
 
   /** Override default theme colors */
   theme?: {
-    primary?: string     // trigger + panel header background. Default: '#0c0c0c'
+    primary?: string     // panel header background. Default: '#0c0c0c'
     background?: string  // panel body background. Default: '#ffffff'
     text?: string        // panel body text. Default: '#0c0c0c'
   }
@@ -153,6 +161,7 @@ const widget = new Accessify(config?)
 | `setSize(size)` | Change widget size at runtime (`'S'`, `'M'`, `'L'`) |
 | `setLang(lang)` | Change language at runtime |
 | `setColorScheme(scheme)` | Change color scheme at runtime (`'light'` or `'dark'`) |
+| `setTriggerScheme(scheme)` | Change trigger button color at runtime (`'auto'`, `'dark'`, or `'light'`) |
 | `getState()` | Returns a copy of the current `AccessifyState` |
 | `getIsOpen()` | Returns whether the panel is open |
 
@@ -173,6 +182,30 @@ new Accessify({ colorScheme: 'dark' })
 widget.setColorScheme('dark')
 widget.setColorScheme('light')
 ```
+
+### Trigger button color
+
+The trigger button (the small circle in the corner that opens the panel) follows `colorScheme` by default — a light page gets a light trigger, a dark page gets a dark trigger. Pin it to a specific color with `triggerScheme`:
+
+```ts
+// Default: trigger follows colorScheme
+new Accessify({ colorScheme: 'dark' })            // → black trigger, white icon
+new Accessify({ colorScheme: 'light' })           // → white trigger, dark icon
+
+// Force a specific trigger regardless of colorScheme
+new Accessify({ colorScheme: 'light', triggerScheme: 'dark' })  // dark trigger on a light page
+new Accessify({ colorScheme: 'dark', triggerScheme: 'light' })  // light trigger on a dark page
+
+// Change at runtime
+widget.setTriggerScheme('dark')
+widget.setTriggerScheme('auto')   // back to following colorScheme
+```
+
+| `triggerScheme` | Result |
+|---|---|
+| `'auto'` (default) | Matches `colorScheme` — light page → light trigger, dark page → dark trigger |
+| `'dark'` | Black background + white icon, regardless of `colorScheme` |
+| `'light'` | White background + dark icon, regardless of `colorScheme` |
 
 ---
 
@@ -302,7 +335,7 @@ import { AccessifyWidget } from '@glitchlab/accessify/react'
 />
 ```
 
-The `colorScheme`, `lang`, and `size` props are **reactive** — changing them after mount will update the widget at runtime. Other props (`position`, `theme`, `persistence`) only take effect at construction; remount the widget (e.g. via a React `key`) to change them.
+The `colorScheme`, `triggerScheme`, `lang`, and `size` props are **reactive** — changing them after mount will update the widget at runtime. Other props (`position`, `theme`, `persistence`) only take effect at construction; remount the widget (e.g. via a React `key`) to change them.
 
 ### `useAccessify(config?)`
 

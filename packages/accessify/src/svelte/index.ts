@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store'
-import { Accessify, type AccessifyConfig, type AccessifyState, type ColorScheme, type Lang, type WidgetSize } from '../core'
+import { Accessify, type AccessifyConfig, type AccessifyState, type ColorScheme, type Lang, type TriggerScheme, type WidgetSize } from '../core'
 
 export function createAccessifyStore(config: AccessifyConfig = {}) {
   const instance = new Accessify(config)
@@ -20,6 +20,7 @@ export function createAccessifyStore(config: AccessifyConfig = {}) {
     setSize: (size: WidgetSize) => { instance.setSize(size); sync() },
     setLang: (lang: Lang) => { instance.setLang(lang); sync() },
     setColorScheme: (scheme: ColorScheme) => { instance.setColorScheme(scheme); sync() },
+    setTriggerScheme: (scheme: TriggerScheme) => { instance.setTriggerScheme(scheme); sync() },
   }
 }
 

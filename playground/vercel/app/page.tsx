@@ -16,6 +16,7 @@ const DEFAULT_CONFIG: WidgetConfig = {
   lang: 'en',
   persistence: true,
   primary: '#0c0c0c',
+  triggerScheme: 'dark',
 }
 
 function CopyButton({ text }: { text: string }) {
@@ -203,13 +204,14 @@ export default function Home() {
 
       {/* The actual widget — driven by sidebar config */}
       <AccessifyWidget
-        key={`${config.position}-${config.size}-${config.colorScheme}-${config.lang}-${config.persistence}-${config.primary}`}
+        key={`${config.position}-${config.size}-${config.colorScheme}-${config.lang}-${config.persistence}-${config.primary}-${config.triggerScheme}`}
         position={config.position}
         size={config.size}
         colorScheme={config.colorScheme}
         lang={config.lang}
         persistence={config.persistence}
         theme={theme}
+        triggerScheme={config.triggerScheme}
       />
     </div>
   )

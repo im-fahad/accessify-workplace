@@ -366,6 +366,98 @@ describe('Accessify — dark mode', () => {
   })
 })
 
+describe('Accessify — triggerScheme', () => {
+  it('explicit triggerScheme="dark" → dark trigger', () => {
+    const a = new Accessify({ triggerScheme: 'dark' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#0c0c0c')
+    expect(root.style.getPropertyValue('--acc-trigger-icon')).toBe('#ffffff')
+    a.destroy()
+  })
+
+  it('explicit triggerScheme="light" → light trigger', () => {
+    const a = new Accessify({ triggerScheme: 'light' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#ffffff')
+    expect(root.style.getPropertyValue('--acc-trigger-icon')).toBe('#0c0c0c')
+    a.destroy()
+  })
+
+  it('triggerScheme unset, colorScheme="dark" → trigger matches: dark', () => {
+    const a = new Accessify({ colorScheme: 'dark' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#0c0c0c')
+    expect(root.style.getPropertyValue('--acc-trigger-icon')).toBe('#ffffff')
+    a.destroy()
+  })
+
+  it('triggerScheme unset, colorScheme="light" → trigger matches: light', () => {
+    const a = new Accessify({ colorScheme: 'light' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#ffffff')
+    expect(root.style.getPropertyValue('--acc-trigger-icon')).toBe('#0c0c0c')
+    a.destroy()
+  })
+
+  it('triggerScheme and colorScheme both unset → falls back to default colorScheme (light) → light trigger', () => {
+    const a = new Accessify()
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#ffffff')
+    expect(root.style.getPropertyValue('--acc-trigger-icon')).toBe('#0c0c0c')
+    a.destroy()
+  })
+
+  it('triggerScheme="auto" explicitly → still matches resolved colorScheme', () => {
+    const a = new Accessify({ triggerScheme: 'auto', colorScheme: 'dark' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#0c0c0c')
+    a.destroy()
+  })
+
+  it('explicit triggerScheme wins over colorScheme', () => {
+    const a = new Accessify({ triggerScheme: 'light', colorScheme: 'dark' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#ffffff')
+    a.destroy()
+  })
+
+  it('setTriggerScheme updates trigger styling at runtime', () => {
+    const a = new Accessify({ triggerScheme: 'light' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#ffffff')
+    a.setTriggerScheme('dark')
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#0c0c0c')
+    a.destroy()
+  })
+
+  it('setColorScheme refreshes trigger when on "auto"', () => {
+    const a = new Accessify({ colorScheme: 'light' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#ffffff')
+    a.setColorScheme('dark')
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#0c0c0c')
+    a.destroy()
+  })
+
+  it('setColorScheme does NOT touch trigger when explicit triggerScheme is set', () => {
+    const a = new Accessify({ triggerScheme: 'light', colorScheme: 'light' })
+    a.mount()
+    const root = document.querySelector<HTMLElement>('.accessify-root')!
+    a.setColorScheme('dark')
+    expect(root.style.getPropertyValue('--acc-trigger-bg')).toBe('#ffffff') // still light
+    a.destroy()
+  })
+})
+
 describe('Accessify — i18n', () => {
   it('renders Spanish labels when lang=es', () => {
     const a = new Accessify({ lang: 'es' })
